@@ -27,7 +27,7 @@ class Window(tk.Tk):
     
         def save_inputfile(savetitle=None):
     
-            # example of ow to validate for a number
+            # example of ow to validate for a number only
             try:
                 albedo = float(entry_albedo.get())
             except:
