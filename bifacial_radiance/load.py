@@ -454,25 +454,13 @@ def readconfigurationinputfile(inifile=None):
     
     confdict = {section: dict(config.items(section)) for section in config.sections()}
     
+    ## Set up simulationParamsDict and simParams object
     if config.has_section("simulationParamsDict"):
         simulationParamsDict = boolConvert(confdict['simulationParamsDict'])
+        simParams = SimulationParams(simulationParamsDict) # load a class
     else:
         raise Exception("Missing simulationParamsDict! Breaking")
-        
-        
-    if config.has_section("sceneParamsDict"):
-        sceneParamsDict2 = boolConvert(confdict['sceneParamsDict'])
-    else:
-        raise Exception("Missing sceneParams Dictionary! Breaking")
-            
-    if simulationParamsDict['timestampRangeSimulation'] or simulationParamsDict['daydateSimulation']:
-        if config.has_section("timeControlParamsDict"):
-            timeControlParamsDict2 = boolConvert(confdict['timeControlParamsDict'])
-            timeControlParamsDict={} # saving a main dictionary wiht only relevant options.
-        else:
-            print("Mising timeControlParamsDict for simulation options specified! Breaking")
-    #        break;            
-            
+ 
     if simulationParamsDict['getEPW']:
         try:
             simulationParamsDict['latitude'] = float(simulationParamsDict['latitude'])
@@ -500,6 +488,7 @@ def readconfigurationinputfile(inifile=None):
                       "No Weather file was passed, so default values will be used,",\
                       "latitud: %s, longitude: %s" % (simulationParamsDict['latitude'], simulationParamsDict['longitude']))
     
+    ## set up moduleParamsDict
     if config.has_section("moduleParamsDict"):
         moduleParamsDict2 = boolConvert(confdict['moduleParamsDict'])
         moduleParamsDict={} # Defining a new one to only save relevant values from passed.
@@ -530,6 +519,7 @@ def readconfigurationinputfile(inifile=None):
             moduleParamsDict['zgap'] = 0.1 #Default
             print("Load Warning: moduleParamsDict['zgap'] not specified, setting to default value: %s" % moduleParamsDict['zgap'] ) 
                     
+        ## set up celllevelModule
         if simulationParamsDict['cellLevelModule']:    
             if config.has_section("cellLevelModuleParamsDict"):
                 cellLevelModuleParamsDict = confdict['cellLevelModuleParamsDict']
@@ -588,6 +578,15 @@ def readconfigurationinputfile(inifile=None):
                 moduleParamsDict['y'] = 1.95
                 print("Load Warning: moduleParamsDict['y'] not specified, setting to default value: %s" % moduleParamsDict['y'] ) 
            
+    ## Set up timeControlParams        
+    if simulationParamsDict['timestampRangeSimulation'] or simulationParamsDict['daydateSimulation']:
+        if config.has_section("timeControlParamsDict"):
+            timeControlParamsDict2 = boolConvert(confdict['timeControlParamsDict'])
+            timeControlParamsDict={} # saving a main dictionary wiht only relevant options.
+        else:
+            print("Mising timeControlParamsDict for simulation options specified! Breaking")
+    #        break; 
+    
     if simulationParamsDict['tracking']:
         if simulationParamsDict['timestampRangeSimulation']:
             try:
@@ -651,6 +650,11 @@ def readconfigurationinputfile(inifile=None):
                        "setting to default %s to % s" % (timeControlParamsDict['timeindexstart'], timeControlParamsDict['timeindexend']) )
     
     #NEEDED sceneParamsDict parameters
+    if config.has_section("sceneParamsDict"):
+        sceneParamsDict2 = boolConvert(confdict['sceneParamsDict'])
+    else:
+        raise Exception("Missing sceneParams Dictionary! Breaking")
+    
     sceneParamsDict={}
     try:
         sceneParamsDict['albedo']=round(float(sceneParamsDict2['albedo']),2)
@@ -802,11 +806,40 @@ def savedictionariestoConfigurationIniFile(simulationParamsDict, sceneParamsDict
         config.write(configfile)
         
 
+class SubParam():
+    """
+    base class for import parameter dictionary
+    pass in dictionary d to initialize
+    to get dictionary back out, use __dict__ function
+    """
+    def __init__(self, d): 
+        for a, b in d.items():
+            if isinstance(b, (list, tuple)):
+               setattr(self, a, [SubParam(x) if isinstance(x, dict) else x for x in b])
+            else:
+               setattr(self, a, SubParam(b) if isinstance(b, dict) else b)
+    
+    def vals(self):
+        return self.__dict__
+    
+class SimulationParams(SubParam):
+    """
+    simulationParams          testfolder, weatherfile, getEPW, simulationname, 
+                              moduletype, rewritemodule,
+                              rcellLevelmodule, axisofrotationtorquetube, 
+                              torqueTube, hpc, tracking, cumulativesky,
+                              daydateSimulation, timestampRangeSimulation
+    """
+
+    
+    def load(d): #confdict['simulationParamsDict']
+        pass
+        
 
 class Params():
     """
 
-    model configuration parameters. Including the following:
+    model configuration parameter. Including the following Dicts:
     
     simulationParams          testfolder, weatherfile, getEPW, simulationname, 
                                   moduletype, rewritemodule,
