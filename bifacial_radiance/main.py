@@ -511,7 +511,24 @@ class RadianceObj:
 
         return metdata
 
-            
+    def readInesMeteoFile(self, tmydata=None, metadata=None):
+        """
+        Args:
+            tmydata (Pandas DataFrame): pandas DataFrame conatining GHI, DNI and DHI columns.
+            metadata (dcit):
+        
+        Returns:
+        """
+        self.metdata = MetObj(tmydata, metadata)
+        csvfile = os.path.join('EPWs', 'tmy3_temp.csv') #temporary filename with 2-column GHI,DHI data
+        #Create new temp csv file for gencumsky. write 8760 2-column csv:  GHI,DHI
+        #save in 2-column GHI,DHI format for gencumulativesky -G
+        savedata = pd.DataFrame({'GHI':tmydata['GHI'], 'DHI':tmydata['DHI']})
+        print('Saving file {}, # points: {}'.format(csvfile, savedata.__len__()))
+        savedata.to_csv(csvfile, index=False, header=False, sep=' ', columns=['GHI','DHI'])
+        self.epwfile = csvfile
+
+        return self.metdata        
     def readTMY(self, tmyfile=None):
         '''
         use pvlib to read in a tmy3 file.
