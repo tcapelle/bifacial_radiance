@@ -39,7 +39,7 @@ def define_meteo(inca, ines_meteo_file):
     inca.input_meteo = input_meteo
     return inca.readInesMeteoFile(input_meteo, metadata)
 
-def define_scene(inca, monitor=6):
+def define_scene(inca, monitor=5):
     inca.setGround(0.4)
 
     mod1 = 'test'
@@ -72,7 +72,7 @@ def define_scene(inca, monitor=6):
 
 
 def compute_radiance(timeindex, inca, sim_name='sim'):
-    if (inca.input_meteo.iloc[timeindex,0] >= 10) and  (inca.input_meteo.iloc[timeindex,1]>10):
+    if (inca.input_meteo.iloc[timeindex,0] >= 10) or  (inca.input_meteo.iloc[timeindex,1]>10):
         skyname = inca.gendaylit(inca.metdata,timeindex) 
         filelist = inca.getfilelist()
         filelist[1] = skyname
@@ -84,6 +84,12 @@ def compute_radiance(timeindex, inca, sim_name='sim'):
     else:
         return [0]*(2*9)
 
+def delete_oct_files(project_path):
+    files = [file for file in project_path.iterdir() if file.name.endswith('.oct')]
+    for f in files:
+        f.unlink()
+    print(f'Deleted {len(files)} .oct files')
+    return
 
 if __name__ == '__main__':
     sim_name = 'inca_period_test'
