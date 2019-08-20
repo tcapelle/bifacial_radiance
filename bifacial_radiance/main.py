@@ -528,7 +528,8 @@ class RadianceObj:
         savedata.to_csv(csvfile, index=False, header=False, sep=' ', columns=['GHI','DHI'])
         self.epwfile = csvfile
 
-        return self.metdata        
+        return self.metdata       
+     
     def readTMY(self, tmyfile=None):
         '''
         use pvlib to read in a tmy3 file.
@@ -740,8 +741,8 @@ class RadianceObj:
             '0\n0\n8\n0 0 -.01\n0 0 1\n0 100'
 
         time = metdata.datetime[timeindex]
-        filename = str(time)[5:-12].replace('-','_').replace(' ','_')
-
+        # filename = str(time)[5:-12].replace('-','_').replace(' ','_')
+        filename = timeindex
         skyname = os.path.join(sky_path,"sky2_%s_%s_%s.rad" %(lat, lon, filename))
 
         skyFile = open(skyname, 'w')
@@ -1047,7 +1048,7 @@ class RadianceObj:
                 trackerdict2[filename]['skyfile'] = skyfile
                 count +=1
 
-        print('Created {} skyfiles in /skies/'.format(count))
+        # print('Created {} skyfiles in /skies/'.format(count))
         self.trackerdict = trackerdict2
         return trackerdict2
 
@@ -1080,7 +1081,7 @@ class RadianceObj:
             savefile = '1axis_%s'%(theta)  #prefix for .cal file and skies\*.rad file
             skyfile = self.genCumSky(epwfile=csvfile, startdt=startdt, enddt=enddt, savefile=savefile)
             trackerdict[theta]['skyfile'] = skyfile
-            print('Created skyfile %s'%(skyfile))
+            # print('Created skyfile %s'%(skyfile))
         # delete default skyfile (not strictly necessary)
         self.skyfiles = None
         self.trackerdict = trackerdict
@@ -1147,7 +1148,7 @@ class RadianceObj:
         #use rvu to see if everything looks good. 
         # use cmd for this since it locks out the terminal.
         #'rvu -vf views\side.vp -e .01 monopanel_test.oct'
-        print("Created %s.oct" % (octname))
+        # print("Created %s.oct" % (octname))
         self.octfile = '%s.oct' % (octname)
         return '%s.oct' % (octname)
 
@@ -2879,7 +2880,7 @@ class AnalysisObj:
         out = {key: [] for key in keys}
         #out = dict.fromkeys(['Wm2','x','y','z','r','g','b','mattype','title'])
         out['title'] = mytitle
-        print ('Linescan in process: %s' %(mytitle))
+        # print ('Linescan in process: %s' %(mytitle))
         #rtrace ambient values set for 'very accurate':
         #cmd = "rtrace -i -ab 5 -aa .08 -ar 512 -ad 2048 -as 512 -h -oovs "+ octfile
 
@@ -3197,8 +3198,8 @@ class AnalysisObj:
         backDict = self.irrPlotNew(octfile, linepts, name+'_Back',
                                    plotflag=plotflag, accuracy=accuracy)
         # don't save if irrPlotNew returns an empty file.
-        if frontDict is not None:
-            self.saveResults(frontDict, backDict,'irr_%s.csv'%(name) )
+        # if frontDict is not None:
+        #     self.saveResults(frontDict, backDict,'irr_%s.csv'%(name) )
 
         return frontDict, backDict
     
