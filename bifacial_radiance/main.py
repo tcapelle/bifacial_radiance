@@ -740,7 +740,6 @@ class RadianceObj:
             "\n%s ring groundplane\n" % (self.ground.ground_type) +\
             '0\n0\n8\n0 0 -.01\n0 0 1\n0 100'
 
-        time = metdata.datetime[timeindex]
         # filename = str(time)[5:-12].replace('-','_').replace(' ','_')
         filename = timeindex
         skyname = os.path.join(sky_path,"sky2_%s_%s_%s.rad" %(lat, lon, filename))
