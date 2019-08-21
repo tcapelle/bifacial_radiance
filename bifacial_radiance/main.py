@@ -1621,7 +1621,7 @@ class RadianceObj:
             self.radfiles = [self.sceneRAD]
         return self.scene
 
-    def appendtoScene(self, radfile=None, customObject=None, text=''):
+    def appendtoScene(self, radfile=None, customObject=None, text='', hpc=False):
         '''
         demo.addtoScene(scene.radfile, customObject, text='')
         Appends to the Scene radfile in \\objects the text command in Radiance
@@ -1642,7 +1642,9 @@ class RadianceObj:
         Nothing, the radfile must already be created and assigned when running this.
 
         '''
-
+        if hpc:
+            customObject = os.path.join(os.getcwd(), customObject) 
+            print(customObject)
         # py2 and 3 compatible: binary write, encode text first
         text2 = '\n' + text + ' ' + customObject
         
