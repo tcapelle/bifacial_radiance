@@ -8,13 +8,7 @@ import matplotlib.pyplot as plt
 
 from .main import RadianceObj,AnalysisObj
 
-project_name = 'IncaFixed'
-# lspv_path = Path("C:/Users/tc256760/Documents/Modelisation Framework/lspv_analyseSoft")
-lspv_path = Path.home()/Path("Documents/lspv_analyseSoft")
-# ines_meteo_file = lspv_path/'Inca/tmy_INCA_bifi_1H.hdf'
 
-project_path = lspv_path/'RayTracing_simulations/dev_nbs'/project_name
-if not project_path.exists(): project_path.mkdir()
 
 
 metadata = {'Name': 'Chamberytown',
@@ -182,6 +176,14 @@ def delete_oct_files(project_path):
     return
 
 if __name__ == '__main__':
+
+    project_name = 'IncaFixed'
+    # lspv_path = Path("C:/Users/tc256760/Documents/Modelisation Framework/lspv_analyseSoft")
+    lspv_path = Path.home()/Path("Documents/lspv_analyseSoft")
+    # ines_meteo_file = lspv_path/'Inca/tmy_INCA_bifi_1H.hdf'
+
+    project_path = lspv_path/'RayTracing_simulations/dev_nbs'/project_name
+    if not project_path.exists(): project_path.mkdir()
     sim_name = 'inca_period_test'
     ines_meteo_file = Path.home()/'DATA/INCA/chic_bi3p/tmy_INCA_bifi_1H.hdf'
     sensorsy=9
