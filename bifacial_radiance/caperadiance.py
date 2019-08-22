@@ -69,6 +69,7 @@ def define_scene(inca, monitor=5):
     sceneObjs += [inca.makeScene(moduletype=mod2,sceneDict=sceneDict7, hpc=True)]
     
     inca.monitored_obj = sceneObjs[monitor]
+    return inca.monitored_obj
 
 def add_ref_cell(inca):
     moduletype_refCell = 'celda_ref'
@@ -151,6 +152,13 @@ def add_vert_posts(inca):
     customObject = inca.makeCustomObject(name,text)
     inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
     
+    return
+    
+def add_box(inca):
+    name='Boite_electrique'
+    text='! genbox black originMarker 0.12 0.20 0.24 | xform -t -12.90 0.3725 1.13'
+    customObject = inca.makeCustomObject(name,text)
+    inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
     return
 
 def compute_radiance(timeindex, inca, sim_name='sim'):
