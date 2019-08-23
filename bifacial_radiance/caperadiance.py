@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 
 from .main import RadianceObj,AnalysisObj
 
+Path.ls = lambda x: sorted(list(x.iterdir()))
 
 
 
@@ -27,10 +28,12 @@ def get_time_interval(inca, date):
     else: return (sl, sl+1)
 
 
-def define_meteo(inca, ines_meteo_file):
+def read_meteo_file(ines_meteo_file):
     meteo = pd.read_hdf(ines_meteo_file, key='df')
-    input_meteo = meteo.meteo[['ghi', 'dni', 'dhi']].rename(columns=str.upper)
-    inca.input_meteo = input_meteo
+    return meteo.meteo[['ghi', 'dni', 'dhi']].rename(columns=str.upper)
+
+def define_meteo(inca, ines_meteo_file):
+    input_meteo =read_meteo_file(ines_meteo_file)
     return inca.readInesMeteoFile(input_meteo, metadata)
 
 def define_scene(inca, monitor=5):
@@ -65,46 +68,40 @@ def define_scene(inca, monitor=5):
     inca.monitored_obj = sceneObjs[monitor]
     return inca.monitored_obj
 
-def add_ref_cell(inca):
-    moduletype_refCell = 'celda_ref'
-    inca.makeModule(name=moduletype_refCell,x=0.156,y=0.156,numpanels = 1,xgap=0.04,ygap=0.05)
-    sceneRef_rCell = {'tilt':30,'pitch': 9.5,'clearance_height':1.05,'azimuth':180, 'nMods': 1, 'nRows': 2, 'appendRadfile':True,'originx': -12.90, 'originy': 0} 
-    sceneObj_rCell = inca.makeScene(moduletype=moduletype_refCell, sceneDict=sceneRef_rCell, hpc=True)
-    return sceneObj_rCell
 
 def add_diag_posts(inca):
     name='DPost1'
-    text='! genbox black DiagPost 0.12 3.0 0.24 | xform -rx 30 -t 0 0 0.5622 -a 1 -t 0.196 0 0 -a 2 -t 0 9.5 0 -i 1 -t -0.0 -0.0 0 -rz 0 -t -15.965 -1.33 0'
+    text='! genbox Metal_Grey DiagPost 0.12 3.0 0.24 | xform -rx 30 -t 0 0 0.5622 -a 1 -t 0.196 0 0 -a 2 -t 0 9.5 0 -i 1 -t -0.0 -0.0 0 -rz 0 -t -15.965 -1.33 0'
     customObject = inca.makeCustomObject(name,text)
     inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
 
     name='DPost2'
-    text='! genbox black DiagPost 0.12 3.0 0.24 | xform -rx 30 -t 0 0 0.5622 -a 1 -t 0.196 0 0 -a 2 -t 0 9.5 0 -i 1 -t -0.0 -0.0 0 -rz 0 -t -12.8750 -1.33 0'
+    text='! genbox Metal_Grey DiagPost 0.12 3.0 0.24 | xform -rx 30 -t 0 0 0.5622 -a 1 -t 0.196 0 0 -a 2 -t 0 9.5 0 -i 1 -t -0.0 -0.0 0 -rz 0 -t -12.8750 -1.33 0'
     customObject = inca.makeCustomObject(name,text)
     inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
 
     name='DPost3'
-    text='! genbox black DiagPost 0.12 3.0 0.24 | xform -rx 30 -t 0 0 0.5622 -a 1 -t 0.196 0 0 -a 2 -t 0 9.5 0 -i 1 -t -0.0 -0.0 0 -rz 0 -t -9.785 -1.33 0'
+    text='! genbox Metal_Grey DiagPost 0.12 3.0 0.24 | xform -rx 30 -t 0 0 0.5622 -a 1 -t 0.196 0 0 -a 2 -t 0 9.5 0 -i 1 -t -0.0 -0.0 0 -rz 0 -t -9.785 -1.33 0'
     customObject = inca.makeCustomObject(name,text)
     inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
 
     name='DPost4'
-    text='! genbox black DiagPost 0.12 3.0 0.24 | xform -rx 30 -t 0 0 0.5622 -a 1 -t 0.196 0 0 -a 2 -t 0 9.5 0 -i 1 -t -0.0 -0.0 0 -rz 0 -t -6.685 -1.33 0'
+    text='! genbox Metal_Grey DiagPost 0.12 3.0 0.24 | xform -rx 30 -t 0 0 0.5622 -a 1 -t 0.196 0 0 -a 2 -t 0 9.5 0 -i 1 -t -0.0 -0.0 0 -rz 0 -t -6.685 -1.33 0'
     customObject = inca.makeCustomObject(name,text)
     inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
 
     name='DPost5'
-    text='! genbox black DiagPost 0.12 3.0 0.24 | xform -rx 30 -t 0 0 0.5622 -a 1 -t 0.196 0 0 -a 2 -t 0 9.5 0 -i 1 -t -0.0 -0.0 0 -rz 0 -t -3.595 -1.33 0'
+    text='! genbox Metal_Grey DiagPost 0.12 3.0 0.24 | xform -rx 30 -t 0 0 0.5622 -a 1 -t 0.196 0 0 -a 2 -t 0 9.5 0 -i 1 -t -0.0 -0.0 0 -rz 0 -t -3.595 -1.33 0'
     customObject = inca.makeCustomObject(name,text)
     inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
 
     name='DPost6'
-    text='! genbox black DiagPost 0.12 3.0 0.24 | xform -rx 30 -t 0 0 0.5622 -a 1 -t 0.196 0 0 -a 2 -t 0 9.5 0 -i 1 -t -0.0 -0.0 0 -rz 0 -t 5.655 -1.33 0'
+    text='! genbox Metal_Grey DiagPost 0.12 3.0 0.24 | xform -rx 30 -t 0 0 0.5622 -a 1 -t 0.196 0 0 -a 2 -t 0 9.5 0 -i 1 -t -0.0 -0.0 0 -rz 0 -t 5.655 -1.33 0'
     customObject = inca.makeCustomObject(name,text)
     inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
 
     name='DPost7'
-    text='! genbox black DiagPost 0.12 3.0 0.24 | xform -rx 30 -t 0 0 0.5622 -a 1 -t 0.196 0 0 -a 2 -t 0 9.5 0 -i 1 -t -0.0 -0.0 0 -rz 0 -t 8.745 -1.33 0'
+    text='! genbox Metal_Grey DiagPost 0.12 3.0 0.24 | xform -rx 30 -t 0 0 0.5622 -a 1 -t 0.196 0 0 -a 2 -t 0 9.5 0 -i 1 -t -0.0 -0.0 0 -rz 0 -t 8.745 -1.33 0'
     customObject = inca.makeCustomObject(name,text)
     inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
     
@@ -112,37 +109,37 @@ def add_diag_posts(inca):
 
 def add_vert_posts(inca):
     name = 'post1'
-    text= '! genbox black VertPost 0.12 0.24 0.77 | xform -t -15.965 -1.45 0'
+    text= '! genbox Metal_Grey VertPost 0.12 0.24 0.77 | xform -t -15.965 -1.45 0'
     customObject = inca.makeCustomObject(name,text)
     inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
 
     name='Post2'
-    text='! genbox black VertPost 0.12 0.24 0.77 | xform -t -12.8750 -1.45 0'
+    text='! genbox Metal_Grey VertPost 0.12 0.24 0.77 | xform -t -12.8750 -1.45 0'
     customObject = inca.makeCustomObject(name,text)
     inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
 
     name='Post3'
-    text='! genbox black VertPost 0.12 0.24 0.77 | xform -t -9.785 -1.45 0'
+    text='! genbox Metal_Grey VertPost 0.12 0.24 0.77 | xform -t -9.785 -1.45 0'
     customObject = inca.makeCustomObject(name,text)
     inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
 
     name='Post4'
-    text='! genbox black VertPost 0.12 0.24 0.77 | xform -t -6.685 -1.45 0'
+    text='! genbox Metal_Grey VertPost 0.12 0.24 0.77 | xform -t -6.685 -1.45 0'
     customObject = inca.makeCustomObject(name,text)
     inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
 
     name='Post5'
-    text='! genbox black VertPost 0.12 0.24 0.77 | xform -t -3.595 -1.45 0'
+    text='! genbox Metal_Grey VertPost 0.12 0.24 0.77 | xform -t -3.595 -1.45 0'
     customObject = inca.makeCustomObject(name,text)
     inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
 
     name='Post6'
-    text='! genbox black VertPost 0.12 0.24 0.77 | xform -t 5.655 -1.45 0'
+    text='! genbox Metal_Grey VertPost 0.12 0.24 0.77 | xform -t 5.655 -1.45 0'
     customObject = inca.makeCustomObject(name,text)
     inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
 
     name='Post7'
-    text='! genbox black VertPost 0.12 0.24 0.77 | xform -t 8.745 -1.45 0'
+    text='! genbox Metal_Grey VertPost 0.12 0.24 0.77 | xform -t 8.745 -1.45 0'
     customObject = inca.makeCustomObject(name,text)
     inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
     
@@ -150,19 +147,26 @@ def add_vert_posts(inca):
     
 def add_box(inca):
     name='Boite_electrique'
-    text='! genbox black originMarker 0.12 0.20 0.24 | xform -t -12.90 0.3725 1.13'
+    text='! genbox white_EPDM originMarker 0.12 0.20 0.24 | xform -t -12.953 0.35 1.13'
     customObject = inca.makeCustomObject(name,text)
     inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
     return
 
+def add_ref_cell(inca):
+    moduletype_refCell = 'celda_ref'
+    inca.makeModule(name=moduletype_refCell,x=0.156,y=0.156,numpanels = 1,xgap=0.04,ygap=0.05)
+    sceneRef_rCell = {'tilt':30,'pitch': 9.5,'clearance_height':1.05,'azimuth':180, 'nMods': 1, 'nRows': 2, 'appendRadfile':True,'originx': -12.875, 'originy': 0} 
+    sceneObj_rCell = inca.makeScene(moduletype=moduletype_refCell, sceneDict=sceneRef_rCell, hpc=True)
+    return sceneObj_rCell
+
 def compute_radiance(timeindex, inca, sim_name='sim'):
-    if (inca.input_meteo.iloc[timeindex,0] >= 10) or  (inca.input_meteo.iloc[timeindex,1]>10):
+    if ((inca.metdata.ghi[timeindex] >= 10) or (inca.metdata.dni[timeindex]>10)) and inca.metdata.solpos.iloc[timeindex, 3]>0:
         skyname = inca.gendaylit(inca.metdata,timeindex) 
         filelist = inca.getfilelist()
         filelist[1] = skyname
         octfile = inca.makeOct(filelist, octname = 'inca_period_test'+str(timeindex) )
         analysis = AnalysisObj(octfile, inca.basename) 
-        frontscan, backscan = analysis.moduleAnalysis(inca.monitored_obj)#(scene, modWanted = modWanted, rowWanted = rowWanted, sensorsy=sensorsy)
+        frontscan, backscan = analysis.moduleAnalysis(inca.monitored_obj, 2, 1)#(scene, modWanted = modWanted, rowWanted = rowWanted, sensorsy=sensorsy)
         front, back = analysis.analysis(octfile, sim_name+str(timeindex), frontscan, backscan) 
         return front['Wm2'] + back['Wm2']
     else:

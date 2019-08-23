@@ -1492,7 +1492,6 @@ class RadianceObj:
         self.customradfile = customradfile
         return customradfile
 
-
     def printModules(self):
         # print available module types by creating a dummy SceneObj
         temp = SceneObj()
