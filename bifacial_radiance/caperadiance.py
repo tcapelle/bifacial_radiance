@@ -82,7 +82,7 @@ def genbox(inca,
     inca.appendtoScene(scene_name, box,  hpc=hpc)
     return
 
-def add_vert_posts2(inca,    
+def add_vert_posts(inca,    
                     scene_name='customScene.rad', 
                     material='Metal_Aluminum_Anodized',
                     hpc=True):
@@ -95,81 +95,19 @@ def add_vert_posts2(inca,
     genbox(inca,'vert_post7', scene_name, material, dim=(0.12, 0.24, 0.77), t=(8.745, -1.45, 0), hpc=hpc)
     return
 
-
-def add_diag_posts(inca):
-    # name='DPost1'
-    # text='! genbox Metal_Aluminum_Anodized DiagPost 0.12 3.0 0.24 | xform -rx 30 -t 0 0 0.5622 -a 1 -t 0.196 0 0 -a 2 -t 0 9.5 0 -i 1 -t -0.0 -0.0 0 -rz 0 -t -15.965 -1.33 0'
-    # genbox(dim=(0.12, 3.0, 0.24), r=(30,0,0), t=(-15.965,-1.33, 0.5622))
-
-    name='DPost2'
-    text='! genbox Metal_Aluminum_Anodized DiagPost 0.12 3.0 0.24 | xform -rx 30 -t 0 0 0.5622 -a 1 -t 0.196 0 0 -a 2 -t 0 9.5 0 -i 1 -t -0.0 -0.0 0 -rz 0 -t -12.8750 -1.33 0'
-    customObject = inca.makeCustomObject(name,text)
-    inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
-
-    name='DPost3'
-    text='! genbox Metal_Aluminum_Anodized DiagPost 0.12 3.0 0.24 | xform -rx 30 -t 0 0 0.5622 -a 1 -t 0.196 0 0 -a 2 -t 0 9.5 0 -i 1 -t -0.0 -0.0 0 -rz 0 -t -9.785 -1.33 0'
-    customObject = inca.makeCustomObject(name,text)
-    inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
-
-    name='DPost4'
-    text='! genbox Metal_Aluminum_Anodized DiagPost 0.12 3.0 0.24 | xform -rx 30 -t 0 0 0.5622 -a 1 -t 0.196 0 0 -a 2 -t 0 9.5 0 -i 1 -t -0.0 -0.0 0 -rz 0 -t -6.685 -1.33 0'
-    customObject = inca.makeCustomObject(name,text)
-    inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
-
-    name='DPost5'
-    text='! genbox Metal_Aluminum_Anodized DiagPost 0.12 3.0 0.24 | xform -rx 30 -t 0 0 0.5622 -a 1 -t 0.196 0 0 -a 2 -t 0 9.5 0 -i 1 -t -0.0 -0.0 0 -rz 0 -t -3.595 -1.33 0'
-    customObject = inca.makeCustomObject(name,text)
-    inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
-
-    name='DPost6'
-    text='! genbox Metal_Aluminum_Anodized DiagPost 0.12 3.0 0.24 | xform -rx 30 -t 0 0 0.5622 -a 1 -t 0.196 0 0 -a 2 -t 0 9.5 0 -i 1 -t -0.0 -0.0 0 -rz 0 -t 5.655 -1.33 0'
-    customObject = inca.makeCustomObject(name,text)
-    inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
-
-    name='DPost7'
-    text='! genbox Metal_Aluminum_Anodized DiagPost 0.12 3.0 0.24 | xform -rx 30 -t 0 0 0.5622 -a 1 -t 0.196 0 0 -a 2 -t 0 9.5 0 -i 1 -t -0.0 -0.0 0 -rz 0 -t 8.745 -1.33 0'
-    customObject = inca.makeCustomObject(name,text)
-    inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
-    
+def add_diag_posts(inca,    
+                    scene_name='customScene.rad', 
+                    material='Metal_Aluminum_Anodized',
+                    hpc=True):
+    genbox(inca,'diag_post1', scene_name, material, dim=(0.12, 0.24, 3.4), r=(-60,0,0), t=(-15.965, -1.45, 0.77), hpc=hpc)
+    genbox(inca,'diag_post2', scene_name, material, dim=(0.12, 0.24, 3.4), r=(-60,0,0), t=(-12.8750, -1.45, 0.77), hpc=hpc)
+    genbox(inca,'diag_post3', scene_name, material, dim=(0.12, 0.24, 3.4), r=(-60,0,0), t=(-9.785, -1.45, 0.77), hpc=hpc)
+    genbox(inca,'diag_post4', scene_name, material, dim=(0.12, 0.24, 3.4), r=(-60,0,0), t=(-6.685, -1.45, 0.77), hpc=hpc)
+    genbox(inca,'diag_post5', scene_name, material, dim=(0.12, 0.24, 3.4), r=(-60,0,0), t=(-3.595, -1.45, 0.77), hpc=hpc)
+    genbox(inca,'diag_post6', scene_name, material, dim=(0.12, 0.24, 3.4), r=(-60,0,0), t=(5.655, -1.45, 0.77), hpc=hpc)
+    genbox(inca,'diag_post7', scene_name, material, dim=(0.12, 0.24, 3.4), r=(-60,0,0), t=(8.745, -1.45, 0.77), hpc=hpc)
     return
 
-def add_vert_posts(inca):
-    name = 'post1'
-    text= '! genbox Metal_Aluminum_Anodized VertPost 0.12 0.24 0.77 | xform -t -15.965 -1.45 0'
-    customObject = inca.makeCustomObject(name,text)
-    inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
-
-    name='Post2'
-    text='! genbox Metal_Aluminum_Anodized VertPost 0.12 0.24 0.77 | xform -t -12.8750 -1.45 0'
-    customObject = inca.makeCustomObject(name,text)
-    inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
-
-    name='Post3'
-    text='! genbox Metal_Aluminum_Anodized VertPost 0.12 0.24 0.77 | xform -t -9.785 -1.45 0'
-    customObject = inca.makeCustomObject(name,text)
-    inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
-
-    name='Post4'
-    text='! genbox Metal_Aluminum_Anodized VertPost 0.12 0.24 0.77 | xform -t -6.685 -1.45 0'
-    customObject = inca.makeCustomObject(name,text)
-    inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
-
-    name='Post5'
-    text='! genbox Metal_Aluminum_Anodized VertPost 0.12 0.24 0.77 | xform -t -3.595 -1.45 0'
-    customObject = inca.makeCustomObject(name,text)
-    inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
-
-    name='Post6'
-    text='! genbox Metal_Aluminum_Anodized VertPost 0.12 0.24 0.77 | xform -t 5.655 -1.45 0'
-    customObject = inca.makeCustomObject(name,text)
-    inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
-
-    name='Post7'
-    text='! genbox Metal_Aluminum_Anodized VertPost 0.12 0.24 0.77 | xform -t 8.745 -1.45 0'
-    customObject = inca.makeCustomObject(name,text)
-    inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
-    
-    return
     
 def add_box(inca):
     name='Boite_electrique'
