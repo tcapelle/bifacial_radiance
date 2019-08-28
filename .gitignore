@@ -20,6 +20,7 @@ tests/save.pickle
 bifacial_radiance/TEMP/
 
 # bifacial_radiance other
+*.oct
 bifacial_radiance/data/source/
 
 # Byte-compiled / optimized / DLL files
