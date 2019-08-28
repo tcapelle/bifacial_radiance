@@ -82,6 +82,7 @@ import os, datetime, sys
 from subprocess import Popen, PIPE  # replacement for os.system()
 import matplotlib.pyplot as plt
 import pandas as pd
+from pathlib import Path
 import numpy as np #already imported with above pylab magic
 #from scipy.interpolate import *
 #from IPython.display import Image
@@ -263,8 +264,8 @@ class RadianceObj:
         if not os.path.exists('materials'):  #copy ground.rad to /materials
             os.makedirs('materials')
             print('Making path: materials')
-
-            copy2(os.path.join(DATA_PATH, 'ground.rad'), 'materials')
+        
+        copy2(os.path.join(DATA_PATH, 'ground.rad'), 'materials')
         # if views directory doesn't exist, create it with two default views - side.vp and front.vp
         if not os.path.exists('views'):
             os.makedirs('views')
@@ -1620,7 +1621,7 @@ class RadianceObj:
             self.radfiles = [self.sceneRAD]
         return self.scene
 
-    def appendtoScene(self, radfile=None, customObject=None, text='', hpc=False):
+    def appendtoScene(self, radfile=None, customObject=None, text='!xform', hpc=False):
         '''
         demo.addtoScene(scene.radfile, customObject, text='')
         Appends to the Scene radfile in \\objects the text command in Radiance
@@ -1641,19 +1642,27 @@ class RadianceObj:
         Nothing, the radfile must already be created and assigned when running this.
 
         '''
+        #full path append for linux machines
+        path = Path(self.path)
+        path_obj = path/'objects'
+        if type(radfile) is str: radfile = Path(radfile)
         if hpc:
-            customObject = os.path.join(os.getcwd(), customObject) 
-            print(customObject)
-        # py2 and 3 compatible: binary write, encode text first
-        text2 = '\n' + text + ' ' + customObject
-        
-        debug = False
-        if debug:
-            print (text2)
+            customObject = path/customObject 
+            radfile = path_obj/radfile
+        #radiance command
+        cmd = '\n' + text + ' ' + str(customObject)
 
-        with open(radfile, 'a+') as f:
-            f.write(text2)
+        #verify .rad file exists, else create
 
+        if radfile.exists():
+            print(f'{radfile.name} exists!,\n>> Appending {customObject.name}' )
+            with open(radfile, 'a+') as f:
+                f.write(cmd)
+        else:
+            print(f'{radfile} created!' )
+            with open(radfile, 'w') as f:
+                f.write(cmd)
+            self.radfiles.append(str(radfile))
 
 
 
