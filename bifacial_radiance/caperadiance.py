@@ -5,8 +5,9 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
-from .main import RadianceObj,AnalysisObj, _popen
+import tqdm
+from fire import Fire
+from main import RadianceObj,AnalysisObj, _popen
 
 Path.ls = lambda x: sorted(list(x.iterdir()))
 
@@ -99,16 +100,54 @@ def add_diag_posts(inca,
                     scene_name='customScene.rad', 
                     material='Metal_Aluminum_Anodized',
                     hpc=True):
-    genbox(inca,'diag_post1', scene_name, material, dim=(0.12, 0.24, 3.4), r=(-60,0,0), t=(-15.965, -1.45, 0.77), hpc=hpc)
-    genbox(inca,'diag_post2', scene_name, material, dim=(0.12, 0.24, 3.4), r=(-60,0,0), t=(-12.8750, -1.45, 0.77), hpc=hpc)
-    genbox(inca,'diag_post3', scene_name, material, dim=(0.12, 0.24, 3.4), r=(-60,0,0), t=(-9.785, -1.45, 0.77), hpc=hpc)
-    genbox(inca,'diag_post4', scene_name, material, dim=(0.12, 0.24, 3.4), r=(-60,0,0), t=(-6.685, -1.45, 0.77), hpc=hpc)
-    genbox(inca,'diag_post5', scene_name, material, dim=(0.12, 0.24, 3.4), r=(-60,0,0), t=(-3.595, -1.45, 0.77), hpc=hpc)
-    genbox(inca,'diag_post6', scene_name, material, dim=(0.12, 0.24, 3.4), r=(-60,0,0), t=(5.655, -1.45, 0.77), hpc=hpc)
-    genbox(inca,'diag_post7', scene_name, material, dim=(0.12, 0.24, 3.4), r=(-60,0,0), t=(8.745, -1.45, 0.77), hpc=hpc)
+    length = 3.5
+    genbox(inca,'diag_post1', scene_name, material, dim=(0.12, 0.24, length), r=(-60,0,0), t=(-15.965, -1.45, 0.77), hpc=hpc)
+    genbox(inca,'diag_post2', scene_name, material, dim=(0.12, 0.24, length), r=(-60,0,0), t=(-12.8750, -1.45, 0.77), hpc=hpc)
+    genbox(inca,'diag_post3', scene_name, material, dim=(0.12, 0.24, length), r=(-60,0,0), t=(-9.785, -1.45, 0.77), hpc=hpc)
+    genbox(inca,'diag_post4', scene_name, material, dim=(0.12, 0.24, length), r=(-60,0,0), t=(-6.685, -1.45, 0.77), hpc=hpc)
+    genbox(inca,'diag_post5', scene_name, material, dim=(0.12, 0.24, length), r=(-60,0,0), t=(-3.595, -1.45, 0.77), hpc=hpc)
+    genbox(inca,'diag_post6', scene_name, material, dim=(0.12, 0.24, length), r=(-60,0,0), t=(5.655, -1.45, 0.77), hpc=hpc)
+    genbox(inca,'diag_post7', scene_name, material, dim=(0.12, 0.24, length), r=(-60,0,0), t=(8.745, -1.45, 0.77), hpc=hpc)
     return
 
-    
+def add_hor_posts(inca,    
+                    scene_name='customScene.rad', 
+                    material='Metal_Aluminum_Anodized',
+                    hpc=True):
+    size = 0.09
+    length = 3.5 - size
+    bottom_left = (-15.965, -1.45, 0.77)
+    top_left = (-15.965, -1.45 + length*np.cos(30*np.pi/180), 0.77 + length*np.sin(30*np.pi/180))
+    genbox(inca,'hor_post1', scene_name, material, dim=(24.7, size, size), r=(-60,0,0), t=bottom_left, hpc=hpc)
+    genbox(inca,'hor_post2', scene_name, material, dim=(24.7, size, size), r=(0,0,0), t=top_left, hpc=hpc)
+    return
+
+def add_vert_posts_intra(inca,    
+                    scene_name='customScene.rad', 
+                    material='Metal_Aluminum_Anodized',
+                    hpc=True):
+    size = 0.09
+    length = 3.5
+    deltay = size*np.cos(60*np.pi/180)
+    deltaz = size*np.sin(60*np.pi/180)
+    modulex = 0.99
+    genbox(inca,'diag_post_intra1.1', scene_name, material, 
+            dim=(size, size, length), r=(-60,0,0), t=(-15.965 + 0.12, -1.45+deltay, 0.77+deltaz), hpc=hpc)
+    genbox(inca,'diag_post_intra1.2', scene_name, material, 
+            dim=(size, size, length), r=(-60,0,0), t=(-15.965 + modulex, -1.45+deltay, 0.77+deltaz), hpc=hpc)
+    genbox(inca,'diag_post_intra1.3', scene_name, material, 
+            dim=(size, size, length), r=(-60,0,0), t=(-15.965 + 2*modulex, -1.45+deltay, 0.77+deltaz), hpc=hpc)
+    genbox(inca,'diag_post_intra1.4', scene_name, material, 
+            dim=(size, size, length), r=(-60,0,0), t=(-15.965 + 3*modulex, -1.45+deltay, 0.77+deltaz), hpc=hpc) 
+
+    genbox(inca,'diag_post_intra2', scene_name, material, dim=(size, size, length), r=(-60,0,0), t=(-12.8750, -1.45, 0.77), hpc=hpc)
+    # genbox(inca,'diag_post_intra3', scene_name, material, dim=(size, size, length), r=(-60,0,0), t=(-9.785, -1.45, 0.77), hpc=hpc)
+    # genbox(inca,'diag_post_intra4', scene_name, material, dim=(size, size, length), r=(-60,0,0), t=(-6.685, -1.45, 0.77), hpc=hpc)
+    # genbox(inca,'diag_post_intra5', scene_name, material, dim=(size, size, length), r=(-60,0,0), t=(-3.595, -1.45, 0.77), hpc=hpc)
+    # genbox(inca,'diag_post_intra6', scene_name, material, dim=(size, size, length), r=(-60,0,0), t=(5.655, -1.45, 0.77), hpc=hpc)
+    # genbox(inca,'diag_post_intra7', scene_name, material, dim=(size, size, length), r=(-60,0,0), t=(8.745, -1.45, 0.77), hpc=hpc)
+    return
+
 def add_box(inca):
     name='Boite_electrique'
     text='! genbox beigeroof originMarker 0.12 0.20 0.24 | xform -t -12.875 0.35 1.30'
@@ -141,7 +180,6 @@ def compute_radiance(timeindex, inca, sim_name='sim', sensorsy=9):
             return f'{dt.day}-{dt.month}-{dt.year}_{dt.time()}'
         octfile = inca.makeOct(filelist, octname = sim_name + _format_dt(inca.metdata.datetime[timeindex]) )
         analysis = AnalysisObj(octfile, inca.basename) 
-        # frontscan, backscan = analysis.moduleAnalysis(inca.monitored_obj, 2, 1)#(scene, modWanted = modWanted, rowWanted = rowWanted, sensorsy=sensorsy)
         frontscan, backscan = analysis.moduleAnalysis(inca.monitored_obj, sensorsy=sensorsy)
         front, back = analysis.analysis(octfile, 'output', frontscan, backscan) 
         return front['Wm2'] + back['Wm2']
@@ -168,6 +206,8 @@ def view_timeindex(filename, view='box', program='rvu'):
         cmd = program + ' -vp -17 3 1 -vd 2 -1 -0.3 -vu 0 0 1 -av 0.2 0.2 0.2 '  + filename + output
     elif view == 'side':
         cmd = program + ' -vp -14.3 0.2 1.5 -vd 1 0 0 -vu 0 0 1 -av 0.2 0.2 0.2 '  + filename + output
+    elif view == 'side2':
+        cmd = program + ' -vp -15 -7 3.5 -vd 0 1 -0.3 -vu 0 0 1 -av 10 10 10 -ab 2 '  + filename + output
     elif view == 'back':
         cmd = program + ' -vp -12.815 2 1 -vd 0 -1 0 -vu 0 0 1 -av 0.2 0.2 0.2 '  + filename + output
     elif view == 'front':
@@ -175,36 +215,71 @@ def view_timeindex(filename, view='box', program='rvu'):
     return _popen(cmd, None)
 
 
-if __name__ == '__main__':
+def view_obj(filename, view='diag', program='objview'):
+    if view == 'diag':
+        cmd = program + ' -v "-vp -17 3 1 -vd 2 -1 -0.3 -vu 0 0 1 -av 0.2 0.2 0.2" '  + filename 
+    elif view == 'side':
+        cmd = program + ' -v "-vp -14.3 0.2 1.5 -vd 1 0 0 -vu 0 0 1 -av 0.2 0.2 0.2" '  + filename 
+    elif view == 'front':
+        cmd = program + ' -v "-vp -15 -7 3.5 -vd 0 1 -0.3 -vu 0 0 1 -av 10 10 10 -ab 2" '  + filename
+    elif view == 'back':
+        cmd = program + ' -v "-vp -12.815 2 1 -vd 0 -1 0 -vu 0 0 1 -av 0.2 0.2 0.2" '  + filename 
+    elif view == 'diag2':
+        cmd = program + ' -v "-vp -16 -7 3.5 -vd 0.2 1 -0.3 -vu 0 0 1 -av 10 10 10 -ab 2" '  + filename 
+    elif view == 'top':
+        cmd = program + ' -v "-vp -17.5 1.6 2.7 -vd 1 0 -0.1 -vu 0 0 1" '  + filename 
+    return _popen(cmd, None)
 
+
+
+def run_simulation(date='18 July 2017', outfile='new_results', cores=10, albedo=0.4, add_struct=True, ref_cell=True):
     project_name = 'IncaFixed'
-    # lspv_path = Path("C:/Users/tc256760/Documents/Modelisation Framework/lspv_analyseSoft")
     lspv_path = Path.home()/Path("Documents/lspv_analyseSoft")
-    # ines_meteo_file = lspv_path/'Inca/tmy_INCA_bifi_1H.hdf'
-
+    ines_meteo_file = Path.home()/'DATA/INCA/chic_bi3p/tmy_INCA_bifi_5T.hdf'
     project_path = lspv_path/'RayTracing_simulations/dev_nbs'/project_name
     if not project_path.exists(): project_path.mkdir()
-    sim_name = 'inca_period_test'
-    ines_meteo_file = Path.home()/'DATA/INCA/chic_bi3p/tmy_INCA_bifi_1H.hdf'
-    sensorsy=9
-    inca = RadianceObj(sim_name, str(project_path.absolute())) # Radiance object named inca_first_test
-    define_scene(inca)
-    define_meteo(inca, ines_meteo_file)
+
+    delete_oct_files(project_path)
+    delete_rad_files(project_path)
     
-    date = '18 July 2017'
+    sim_name = 'inca'
+    sensorsy=20
+    inca = RadianceObj(sim_name, str(project_path.absolute())) # Radiance object named inca_first_test
+    inca.setGround(albedo)
+    #define the scene with all the modules and scene dicts
+    module6 = define_scene(inca, 5)  #unused if ref_cell present
+
+    #append the ines meteo file
+    define_meteo(inca, ines_meteo_file)
+
+    ref_cell = add_ref_cell(inca)
+    if add_struct:
+        add_vert_posts(inca)
+        add_diag_posts(inca)
+        add_box(inca)
+    inca.monitored_obj = ref_cell if ref_cell else module6 
+
+    #chose the date of your sim, must be in the input meteo file
+    results_file = date.replace(' ', '') + outfile
     ti, tf = get_time_interval(inca, date)
     print(f'Timeindexes : {ti}, {tf}')
+    pool = Pool(cores)
+    res_list = []
+    print('Launching multiprocessing of 10')
+    f = partial(compute_radiance, inca=inca, sim_name=sim_name, sensorsy=sensorsy)
+    for x in tqdm.tqdm(pool.imap(f, range(ti,tf)), total=tf-ti):
+        res_list.append(x)
+        pass
+    pool.close()
+    pool.join()
+    results = pd.DataFrame(data=res_list, 
+                           index = inca.input_meteo[date].index, 
+                           columns = [f'g_{i}' for i in range(sensorsy)]+[f'gb_{i}' for i in range(sensorsy)])
+
+    print(f'Results file: {results_file}')
+    results.to_hdf(project_path/('results/'+results_file+'.hdf'), key='df')
+    results.to_csv(project_path/('results/'+results_file+'.csv'))
+
+if __name__ == '__main__':
     
-    f = partial(compute_radiance, inca=inca, sim_name=sim_name)
-    p = Pool(6)
-    res_list = p.map(f, range(ti,tf))
-    p.close()
-    p.join()
-
-    res_df = pd.DataFrame(data=res_list, index = inca.input_meteo[date].index, 
-                          columns = [f'g_{i}' for i in range(sensorsy)]+[f'gb_{i}' for i in range(sensorsy)])
-
-    res_df.to_hdf(project_path/'sim_18jul.hdf', key='df')
-    res_df.to_csv(project_path/'sim_18jul.csv')
-
-    print("THE END")
+    Fire(run_simulation)
