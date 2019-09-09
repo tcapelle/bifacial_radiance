@@ -4,10 +4,11 @@ from functools import partial
 from pathlib import Path
 import pandas as pd
 import numpy as np
+from numpy import array
 import matplotlib.pyplot as plt
 import tqdm
 from fire import Fire
-from main import RadianceObj,AnalysisObj, _popen
+from bifacial_radiance.main import RadianceObj,AnalysisObj, _popen
 
 Path.ls = lambda x: sorted(list(x.iterdir()))
 
@@ -42,26 +43,27 @@ def define_scene(inca, monitor=5):
     inca.makeModule(name=mod1,x=0.99,y=1.65,numpanels = 1,xgap=0.04,ygap=0.05)
     mod2 = 'prismSolar'
     inca.makeModule(name=mod2, x=0.99,y=1.65,numpanels = 2,xgap=0.04,ygap=0.05)
+    height = 0.77
     sceneObjs = []
     sceneDict1 = {'tilt':30,'pitch': 9.5,'clearance_height':1.63,'azimuth':180, 'nMods': 1, 'nRows': 2, 'appendRadfile':True,'originx': -3.09, 'originy': 0.736} 
     sceneObjs += [inca.makeScene(moduletype=mod1,sceneDict=sceneDict1, hpc=True)]
 
-    sceneDict2 = {'tilt':30,'pitch': 9.5,'clearance_height':0.9,'azimuth':180, 'nMods': 5, 'nRows': 2, 'appendRadfile':True,'originx': 0, 'originy': 0} 
+    sceneDict2 = {'tilt':30,'pitch': 9.5,'clearance_height':height,'azimuth':180, 'nMods': 5, 'nRows': 2, 'appendRadfile':True,'originx': 0, 'originy': 0} 
     sceneObjs += [inca.makeScene(moduletype=mod2,sceneDict=sceneDict2, hpc=True)]
 
     sceneDict3 = {'tilt':30,'pitch': 9.5,'clearance_height':1.63,'azimuth':180, 'nMods': 1, 'nRows': 2, 'appendRadfile':True,'originx': 3.09, 'originy': 0.736} 
     sceneObjs += [inca.makeScene(moduletype=mod1,sceneDict=sceneDict3, hpc=True)]
 
-    sceneDict4 = {'tilt':30,'pitch': 9.5,'clearance_height':0.9,'azimuth':180, 'nMods': 5, 'nRows': 2, 'appendRadfile':True,'originx': 6.17, 'originy': 0} 
+    sceneDict4 = {'tilt':30,'pitch': 9.5,'clearance_height':height,'azimuth':180, 'nMods': 5, 'nRows': 2, 'appendRadfile':True,'originx': 6.17, 'originy': 0} 
     sceneObjs += [inca.makeScene(moduletype=mod2,sceneDict=sceneDict4, hpc=True)]
 
-    sceneDict5 = {'tilt':30,'pitch': 9.5,'clearance_height':0.9,'azimuth':180, 'nMods': 5, 'nRows': 2, 'appendRadfile':True,'originx': -6.17, 'originy': 0} 
+    sceneDict5 = {'tilt':30,'pitch': 9.5,'clearance_height':height,'azimuth':180, 'nMods': 5, 'nRows': 2, 'appendRadfile':True,'originx': -6.17, 'originy': 0} 
     sceneObjs += [inca.makeScene(moduletype=mod2,sceneDict=sceneDict5, hpc=True)]
 
-    sceneDict6 = {'tilt':30,'pitch': 9.5,'clearance_height':0.9,'azimuth':180, 'nMods': 5, 'nRows': 2, 'appendRadfile':True,'originx': -12.36, 'originy': 0} 
+    sceneDict6 = {'tilt':30,'pitch': 9.5,'clearance_height':height,'azimuth':180, 'nMods': 5, 'nRows': 2, 'appendRadfile':True,'originx': -12.36, 'originy': 0} 
     sceneObjs += [inca.makeScene(moduletype=mod2,sceneDict=sceneDict6, hpc=True)]
 
-    sceneDict7 = {'tilt':30,'pitch': 9.5,'clearance_height':0.9,'azimuth':180, 'nMods': 5, 'nRows': 2, 'appendRadfile':True,'originx': 12.36, 'originy': 0} 
+    sceneDict7 = {'tilt':30,'pitch': 9.5,'clearance_height':height,'azimuth':180, 'nMods': 5, 'nRows': 2, 'appendRadfile':True,'originx': 12.36, 'originy': 0} 
     sceneObjs += [inca.makeScene(moduletype=mod2,sceneDict=sceneDict7, hpc=True)]
     
     inca.monitored_obj = sceneObjs[monitor]
@@ -87,13 +89,26 @@ def add_vert_posts(inca,
                     scene_name='customScene.rad', 
                     material='Metal_Aluminum_Anodized',
                     hpc=True):
-    genbox(inca,'vert_post1', scene_name, material, dim=(0.12, 0.24, 0.77), t=(-15.965, -1.45, 0), hpc=hpc)
-    genbox(inca,'vert_post2', scene_name, material, dim=(0.12, 0.24, 0.77), t=(-12.8750, -1.45, 0), hpc=hpc)
-    genbox(inca,'vert_post3', scene_name, material, dim=(0.12, 0.24, 0.77), t=(-9.785, -1.45, 0), hpc=hpc)
-    genbox(inca,'vert_post4', scene_name, material, dim=(0.12, 0.24, 0.77), t=(-6.685, -1.45, 0), hpc=hpc)
-    genbox(inca,'vert_post5', scene_name, material, dim=(0.12, 0.24, 0.77), t=(-3.595, -1.45, 0), hpc=hpc)
-    genbox(inca,'vert_post6', scene_name, material, dim=(0.12, 0.24, 0.77), t=(5.655, -1.45, 0), hpc=hpc)
-    genbox(inca,'vert_post7', scene_name, material, dim=(0.12, 0.24, 0.77), t=(8.745, -1.45, 0), hpc=hpc)
+    height = 0.67
+    genbox(inca,'vert_post1', scene_name, material, dim=(0.12, 0.24, height), t=(-15.965, -1.45, 0), hpc=hpc)
+    genbox(inca,'vert_post2', scene_name, material, dim=(0.12, 0.24, height), t=(-12.8750, -1.45, 0), hpc=hpc)
+    genbox(inca,'vert_post3', scene_name, material, dim=(0.12, 0.24, height), t=(-9.785, -1.45, 0), hpc=hpc)
+    genbox(inca,'vert_post4', scene_name, material, dim=(0.12, 0.24, height), t=(-6.685, -1.45, 0), hpc=hpc)
+    genbox(inca,'vert_post5', scene_name, material, dim=(0.12, 0.24, height), t=(-3.595, -1.45, 0), hpc=hpc)
+    genbox(inca,'vert_post6', scene_name, material, dim=(0.12, 0.24, height), t=(5.655, -1.45, 0), hpc=hpc)
+    genbox(inca,'vert_post7', scene_name, material, dim=(0.12, 0.24, height), t=(8.745, -1.45, 0), hpc=hpc)
+    return
+
+def pivoting_structure(inca, material='Metal_Aluminum_Anodized', angle=30, hpc=True):
+    def _t(alpha, height, width):
+        return (0, height * np.sin(alpha*np.pi/180)-0.24*np.sin(30*np.pi/180), height*(1-np.cos(alpha*np.pi/180))+ width*np.sin(30*np.pi/180) - 0.24*np.cos(30*np.pi/180))
+    add_diag_posts(inca, 'pivoting_struct.rad', material)
+    add_hor_posts(inca, 'pivoting_struct.rad', material)
+    add_diag_posts_intra(inca, 'pivoting_struct.rad', material)
+    t = _t(angle, 0.67, 1.45)
+    cmd = f'!xform -rx {angle} -t {t[0]} {t[1]} {t[2]} '
+    inca.radfiles.pop() #remove non pivoted scene
+    inca.appendtoScene(f'pivoting_struct_{angle}.rad', 'objects/pivoting_struct.rad', cmd, hpc=hpc) 
     return
 
 def add_diag_posts(inca,    
@@ -101,13 +116,14 @@ def add_diag_posts(inca,
                     material='Metal_Aluminum_Anodized',
                     hpc=True):
     length = 3.5
-    genbox(inca,'diag_post1', scene_name, material, dim=(0.12, 0.24, length), r=(-60,0,0), t=(-15.965, -1.45, 0.77), hpc=hpc)
-    genbox(inca,'diag_post2', scene_name, material, dim=(0.12, 0.24, length), r=(-60,0,0), t=(-12.8750, -1.45, 0.77), hpc=hpc)
-    genbox(inca,'diag_post3', scene_name, material, dim=(0.12, 0.24, length), r=(-60,0,0), t=(-9.785, -1.45, 0.77), hpc=hpc)
-    genbox(inca,'diag_post4', scene_name, material, dim=(0.12, 0.24, length), r=(-60,0,0), t=(-6.685, -1.45, 0.77), hpc=hpc)
-    genbox(inca,'diag_post5', scene_name, material, dim=(0.12, 0.24, length), r=(-60,0,0), t=(-3.595, -1.45, 0.77), hpc=hpc)
-    genbox(inca,'diag_post6', scene_name, material, dim=(0.12, 0.24, length), r=(-60,0,0), t=(5.655, -1.45, 0.77), hpc=hpc)
-    genbox(inca,'diag_post7', scene_name, material, dim=(0.12, 0.24, length), r=(-60,0,0), t=(8.745, -1.45, 0.77), hpc=hpc)
+    height = 0.67
+    genbox(inca,'diag_post1', scene_name, material, dim=(0.12, length, 0.24), t=(-15.965, -1.45, height), hpc=hpc)
+    genbox(inca,'diag_post2', scene_name, material, dim=(0.12, length, 0.24), t=(-12.8750, -1.45, height), hpc=hpc)
+    genbox(inca,'diag_post3', scene_name, material, dim=(0.12, length, 0.24), t=(-9.785, -1.45, height), hpc=hpc)
+    genbox(inca,'diag_post4', scene_name, material, dim=(0.12, length, 0.24), t=(-6.685, -1.45, height), hpc=hpc)
+    genbox(inca,'diag_post5', scene_name, material, dim=(0.12, length, 0.24), t=(-3.595, -1.45, height), hpc=hpc)
+    genbox(inca,'diag_post6', scene_name, material, dim=(0.12, length, 0.24), t=(5.655, -1.45, height), hpc=hpc)
+    genbox(inca,'diag_post7', scene_name, material, dim=(0.12, length, 0.24), t=(8.745, -1.45, height), hpc=hpc)
     return
 
 def add_hor_posts(inca,    
@@ -115,37 +131,30 @@ def add_hor_posts(inca,
                     material='Metal_Aluminum_Anodized',
                     hpc=True):
     size = 0.09
+    height = 0.67
+    z_struct = 0.24
     length = 3.5 - size
-    bottom_left = (-15.965, -1.45, 0.77)
-    top_left = (-15.965, -1.45 + length*np.cos(30*np.pi/180), 0.77 + length*np.sin(30*np.pi/180))
-    genbox(inca,'hor_post1', scene_name, material, dim=(24.7, size, size), r=(-60,0,0), t=bottom_left, hpc=hpc)
-    genbox(inca,'hor_post2', scene_name, material, dim=(24.7, size, size), r=(0,0,0), t=top_left, hpc=hpc)
+    bottom_left = array([-15.965, -1.45, height+z_struct])
+    top_left = array([-15.965, -1.45+length, height+z_struct])
+    midde_left = (top_left + bottom_left)/2
+    genbox(inca,'hor_post_bottom', scene_name, material, dim=(24.7, size, size), t=bottom_left, hpc=hpc)
+    genbox(inca,'hor_post_top', scene_name, material, dim=(24.7, size, size), t=top_left, hpc=hpc)
+    genbox(inca,'hor_post_middle', scene_name, material, dim=(24.7, size, size), t=midde_left, hpc=hpc)
     return
 
-def add_vert_posts_intra(inca,    
+def add_diag_posts_intra(inca,    
                     scene_name='customScene.rad', 
                     material='Metal_Aluminum_Anodized',
                     hpc=True):
     size = 0.09
+    height = 0.67
     length = 3.5
-    deltay = size*np.cos(60*np.pi/180)
-    deltaz = size*np.sin(60*np.pi/180)
-    modulex = 0.99
-    genbox(inca,'diag_post_intra1.1', scene_name, material, 
-            dim=(size, size, length), r=(-60,0,0), t=(-15.965 + 0.12, -1.45+deltay, 0.77+deltaz), hpc=hpc)
-    genbox(inca,'diag_post_intra1.2', scene_name, material, 
-            dim=(size, size, length), r=(-60,0,0), t=(-15.965 + modulex, -1.45+deltay, 0.77+deltaz), hpc=hpc)
-    genbox(inca,'diag_post_intra1.3', scene_name, material, 
-            dim=(size, size, length), r=(-60,0,0), t=(-15.965 + 2*modulex, -1.45+deltay, 0.77+deltaz), hpc=hpc)
-    genbox(inca,'diag_post_intra1.4', scene_name, material, 
-            dim=(size, size, length), r=(-60,0,0), t=(-15.965 + 3*modulex, -1.45+deltay, 0.77+deltaz), hpc=hpc) 
-
-    genbox(inca,'diag_post_intra2', scene_name, material, dim=(size, size, length), r=(-60,0,0), t=(-12.8750, -1.45, 0.77), hpc=hpc)
-    # genbox(inca,'diag_post_intra3', scene_name, material, dim=(size, size, length), r=(-60,0,0), t=(-9.785, -1.45, 0.77), hpc=hpc)
-    # genbox(inca,'diag_post_intra4', scene_name, material, dim=(size, size, length), r=(-60,0,0), t=(-6.685, -1.45, 0.77), hpc=hpc)
-    # genbox(inca,'diag_post_intra5', scene_name, material, dim=(size, size, length), r=(-60,0,0), t=(-3.595, -1.45, 0.77), hpc=hpc)
-    # genbox(inca,'diag_post_intra6', scene_name, material, dim=(size, size, length), r=(-60,0,0), t=(5.655, -1.45, 0.77), hpc=hpc)
-    # genbox(inca,'diag_post_intra7', scene_name, material, dim=(size, size, length), r=(-60,0,0), t=(8.745, -1.45, 0.77), hpc=hpc)
+    z_struct=0.24 + 0.09
+    modulex = 0.99 + size/2
+    t = array([-15.965, -1.45, height+z_struct])
+    for i in range(24):
+        genbox(inca,f'diag_post_intra1.{i}', scene_name, material, 
+               dim=(size, length, size), t=t + i*array([modulex,0,0]), hpc=hpc)
     return
 
 def add_box(inca):
@@ -199,43 +208,37 @@ def delete_rad_files(project_path):
     print(f'Deleted .rad files')
     return
 
-def view_timeindex(filename, view='box', program='rvu'):
-    if program == 'rpict': output = ' > render.pic' 
-    else: output = ''
-    if view == 'diag':
-        cmd = program + ' -vp -17 3 1 -vd 2 -1 -0.3 -vu 0 0 1 -av 0.2 0.2 0.2 '  + filename + output
-    elif view == 'side':
-        cmd = program + ' -vp -14.3 0.2 1.5 -vd 1 0 0 -vu 0 0 1 -av 0.2 0.2 0.2 '  + filename + output
-    elif view == 'side2':
-        cmd = program + ' -vp -15 -7 3.5 -vd 0 1 -0.3 -vu 0 0 1 -av 10 10 10 -ab 2 '  + filename + output
-    elif view == 'back':
-        cmd = program + ' -vp -12.815 2 1 -vd 0 -1 0 -vu 0 0 1 -av 0.2 0.2 0.2 '  + filename + output
-    elif view == 'front':
-        cmd = program + ' -vp 0 -40 25 -vd 0 1 -0.5 -vu 0 0 1 -av 0.2 0.2 0.2 '  + filename + output
+def view(files, view='front', program='rvu'):
+    'Renders a view of the file'
+    views = {'diag': '-vp -17 3 1 -vd 2 -1 -0.3 -vu 0 0 1 -av 0.2 0.2 0.2',
+             'side': '-vp -14.3 0.2 1.5 -vd 1 0 0 -vu 0 0 1 -av 0.2 0.2 0.2',
+             'side2': '-vp -15 -7 3.5 -vd 0 1 -0.3 -vu 0 0 1 -av 10 10 10 -ab 2',
+             'back': '-vp -12.815 2 1 -vd 0 -1 0 -vu 0 0 1 -av 0.2 0.2 0.2',
+             'front': '-vp 0 -40 25 -vd 0 1 -0.5 -vu 0 0 1 -av 0.2 0.2 0.2',
+             'top': '-vp -17.5 1.6 2.7 -vd 1 0 -0.1 -vu 0 0 1',
+             'bottom': '-vp -17.5 -1.45 1.0 -vd 1 0 -0.1 -vu 0 0 1'}
+
+    program = 'objview' if files.endswith('rad') else program
+    vp = views[view] if view in views else view
+    cmd = _cmd(program, vp, files)
     return _popen(cmd, None)
 
-
-def view_obj(filename, view='diag', program='objview'):
-    if view == 'diag':
-        cmd = program + ' -v "-vp -17 3 1 -vd 2 -1 -0.3 -vu 0 0 1 -av 0.2 0.2 0.2" '  + filename 
-    elif view == 'side':
-        cmd = program + ' -v "-vp -14.3 0.2 1.5 -vd 1 0 0 -vu 0 0 1 -av 0.2 0.2 0.2" '  + filename 
-    elif view == 'front':
-        cmd = program + ' -v "-vp -15 -7 3.5 -vd 0 1 -0.3 -vu 0 0 1 -av 10 10 10 -ab 2" '  + filename
-    elif view == 'back':
-        cmd = program + ' -v "-vp -12.815 2 1 -vd 0 -1 0 -vu 0 0 1 -av 0.2 0.2 0.2" '  + filename 
-    elif view == 'diag2':
-        cmd = program + ' -v "-vp -16 -7 3.5 -vd 0.2 1 -0.3 -vu 0 0 1 -av 10 10 10 -ab 2" '  + filename 
-    elif view == 'top':
-        cmd = program + ' -v "-vp -17.5 1.6 2.7 -vd 1 0 -0.1 -vu 0 0 1" '  + filename 
-    return _popen(cmd, None)
+def _cmd(program, vp, filename):
+    vp = ' '+vp+' ' if program =='rvu' else f' -v "{vp}" '
+    cmd = program + vp + filename
+    print(cmd)
+    return  cmd
 
 
-
-def run_simulation(date='18 July 2017', outfile='new_results', cores=10, albedo=0.4, add_struct=True, ref_cell=True):
-    project_name = 'IncaFixed'
-    lspv_path = Path.home()/Path("Documents/lspv_analyseSoft")
-    ines_meteo_file = Path.home()/'DATA/INCA/chic_bi3p/tmy_INCA_bifi_5T.hdf'
+def run_simulation(date='18 July 2017', 
+                   outfile='new_results', 
+                   cores=10, 
+                   albedo=0.4, 
+                   add_struct=True, 
+                   ref_cell=True,
+                   project_name = 'IncaFixed',
+                   lspv_path = Path.home()/Path("Documents/lspv_analyseSoft"),
+                   ines_meteo_file = Path.home()/'DATA/INCA/chic_bi3p/tmy_INCA_bifi_5T.hdf'):
     project_path = lspv_path/'RayTracing_simulations/dev_nbs'/project_name
     if not project_path.exists(): project_path.mkdir()
 
@@ -252,12 +255,12 @@ def run_simulation(date='18 July 2017', outfile='new_results', cores=10, albedo=
     #append the ines meteo file
     define_meteo(inca, ines_meteo_file)
 
-    ref_cell = add_ref_cell(inca)
+    #add strcutures
     if add_struct:
         add_vert_posts(inca)
         add_diag_posts(inca)
         add_box(inca)
-    inca.monitored_obj = ref_cell if ref_cell else module6 
+    inca.monitored_obj = add_ref_cell(inca) if ref_cell else module6 
 
     #chose the date of your sim, must be in the input meteo file
     results_file = date.replace(' ', '') + outfile
@@ -265,7 +268,7 @@ def run_simulation(date='18 July 2017', outfile='new_results', cores=10, albedo=
     print(f'Timeindexes : {ti}, {tf}')
     pool = Pool(cores)
     res_list = []
-    print('Launching multiprocessing of 10')
+    print(f'Launching simulation with {cores} processes')
     f = partial(compute_radiance, inca=inca, sim_name=sim_name, sensorsy=sensorsy)
     for x in tqdm.tqdm(pool.imap(f, range(ti,tf)), total=tf-ti):
         res_list.append(x)
@@ -281,5 +284,4 @@ def run_simulation(date='18 July 2017', outfile='new_results', cores=10, albedo=
     results.to_csv(project_path/('results/'+results_file+'.csv'))
 
 if __name__ == '__main__':
-    
     Fire(run_simulation)
