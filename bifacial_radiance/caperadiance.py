@@ -257,8 +257,7 @@ def run_simulation(date='18 July 2017',
 
     #add strcutures
     if add_struct:
-        add_vert_posts(inca)
-        add_diag_posts(inca)
+        pivoting_structure(inca)
         add_box(inca)
     inca.monitored_obj = add_ref_cell(inca) if ref_cell else module6 
 
