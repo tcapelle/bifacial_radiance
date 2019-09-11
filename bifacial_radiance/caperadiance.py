@@ -69,6 +69,7 @@ def define_scene(inca, monitor=5):
     inca.monitored_obj = sceneObjs[monitor]
     return inca.monitored_obj
 
+STRUCT_HEIGHT = 0.55
 
 def genbox(inca, 
            name, 
@@ -89,7 +90,7 @@ def add_vert_posts(inca,
                     scene_name='customScene.rad', 
                     material='Metal_Aluminum_Anodized',
                     hpc=True):
-    height = 0.67
+    height = STRUCT_HEIGHT
     genbox(inca,'vert_post1', scene_name, material, dim=(0.12, 0.24, height), t=(-15.965, -1.45, 0), hpc=hpc)
     genbox(inca,'vert_post2', scene_name, material, dim=(0.12, 0.24, height), t=(-12.8750, -1.45, 0), hpc=hpc)
     genbox(inca,'vert_post3', scene_name, material, dim=(0.12, 0.24, height), t=(-9.785, -1.45, 0), hpc=hpc)
@@ -97,15 +98,27 @@ def add_vert_posts(inca,
     genbox(inca,'vert_post5', scene_name, material, dim=(0.12, 0.24, height), t=(-3.595, -1.45, 0), hpc=hpc)
     genbox(inca,'vert_post6', scene_name, material, dim=(0.12, 0.24, height), t=(5.655, -1.45, 0), hpc=hpc)
     genbox(inca,'vert_post7', scene_name, material, dim=(0.12, 0.24, height), t=(8.745, -1.45, 0), hpc=hpc)
+    #soil rack
+    genbox(inca,'rack_cables', scene_name, material, dim=(24, 0.24, 0.1), t=(-15.965, -1.45, 0), hpc=hpc)
     return
 
 def pivoting_structure(inca, material='Metal_Aluminum_Anodized', angle=30, hpc=True):
-    def _t(alpha, height, width):
-        return (0, height * np.sin(alpha*np.pi/180)-0.24*np.sin(30*np.pi/180), height*(1-np.cos(alpha*np.pi/180))+ width*np.sin(30*np.pi/180) - 0.24*np.cos(30*np.pi/180))
+    def _t(alpha, h, l):
+        'disgusting geometry'
+        n = np.sqrt(h**2 + l**2)
+        alpha = np.deg2rad(alpha)
+        beta = np.arctan(h/l)
+        gamma = beta-alpha
+        y = -l + n*np.cos(gamma)
+        z = h - n*np.sin(gamma)
+        print(f'alpha, beta, gamma: {alpha, beta, gamma}')
+        print(f'n: {n}')
+        return (0, y, z)
     add_diag_posts(inca, 'pivoting_struct.rad', material)
     add_hor_posts(inca, 'pivoting_struct.rad', material)
     add_diag_posts_intra(inca, 'pivoting_struct.rad', material)
-    t = _t(angle, 0.67, 1.45)
+    t = _t(angle, STRUCT_HEIGHT, 1.45)
+    print(f'moving struct to {t}')
     cmd = f'!xform -rx {angle} -t {t[0]} {t[1]} {t[2]} '
     inca.radfiles.pop() #remove non pivoted scene
     inca.appendtoScene(f'pivoting_struct_{angle}.rad', 'objects/pivoting_struct.rad', cmd, hpc=hpc) 
@@ -116,7 +129,8 @@ def add_diag_posts(inca,
                     material='Metal_Aluminum_Anodized',
                     hpc=True):
     length = 3.5
-    height = 0.67
+    zheight = 0.24
+    height = STRUCT_HEIGHT - zheight
     genbox(inca,'diag_post1', scene_name, material, dim=(0.12, length, 0.24), t=(-15.965, -1.45, height), hpc=hpc)
     genbox(inca,'diag_post2', scene_name, material, dim=(0.12, length, 0.24), t=(-12.8750, -1.45, height), hpc=hpc)
     genbox(inca,'diag_post3', scene_name, material, dim=(0.12, length, 0.24), t=(-9.785, -1.45, height), hpc=hpc)
@@ -131,30 +145,30 @@ def add_hor_posts(inca,
                     material='Metal_Aluminum_Anodized',
                     hpc=True):
     size = 0.09
-    height = 0.67
-    z_struct = 0.24
+    height = STRUCT_HEIGHT
     length = 3.5 - size
-    bottom_left = array([-15.965, -1.45, height+z_struct])
-    top_left = array([-15.965, -1.45+length, height+z_struct])
-    midde_left = (top_left + bottom_left)/2
+    bottom_left = array([-15.965, -1.45, height])
+    top_left = array([-15.965, -1.45+length, height])
+    # midde_left = (top_left + bottom_left)/2
     genbox(inca,'hor_post_bottom', scene_name, material, dim=(24.7, size, size), t=bottom_left, hpc=hpc)
     genbox(inca,'hor_post_top', scene_name, material, dim=(24.7, size, size), t=top_left, hpc=hpc)
-    genbox(inca,'hor_post_middle', scene_name, material, dim=(24.7, size, size), t=midde_left, hpc=hpc)
+    # genbox(inca,'hor_post_middle', scene_name, material, dim=(24.7, size, size), t=midde_left, hpc=hpc)
     return
 
 def add_diag_posts_intra(inca,    
                     scene_name='customScene.rad', 
                     material='Metal_Aluminum_Anodized',
                     hpc=True):
-    size = 0.09
-    height = 0.67
+    zsize = 0.09
+    xsize = 0.045
+    height = STRUCT_HEIGHT
     length = 3.5
-    z_struct=0.24 + 0.09
-    modulex = 0.99 + size/2
+    z_struct=0.09
+    modulex = 0.99 + xsize/2
     t = array([-15.965, -1.45, height+z_struct])
     for i in range(24):
         genbox(inca,f'diag_post_intra1.{i}', scene_name, material, 
-               dim=(size, length, size), t=t + i*array([modulex,0,0]), hpc=hpc)
+               dim=(xsize, length, zsize), t=t + i*array([modulex,0,0]), hpc=hpc)
     return
 
 def add_box(inca):
@@ -212,11 +226,11 @@ def view(files, view='front', program='rvu'):
     'Renders a view of the file'
     views = {'diag': '-vp -17 3 1 -vd 2 -1 -0.3 -vu 0 0 1 -av 0.2 0.2 0.2',
              'side': '-vp -14.3 0.2 1.5 -vd 1 0 0 -vu 0 0 1 -av 0.2 0.2 0.2',
-             'side2': '-vp -15 -7 3.5 -vd 0 1 -0.3 -vu 0 0 1 -av 10 10 10 -ab 2',
+             'side2': '-vp -17 -6 3.5 -vd 0.2 1 -0.3 -vu 0 0 1 -av 10 10 10 -ab 2',
              'back': '-vp -12.815 2 1 -vd 0 -1 0 -vu 0 0 1 -av 0.2 0.2 0.2',
              'front': '-vp 0 -40 25 -vd 0 1 -0.5 -vu 0 0 1 -av 0.2 0.2 0.2',
              'top': '-vp -17.5 1.6 2.7 -vd 1 0 -0.1 -vu 0 0 1',
-             'bottom': '-vp -17.5 -1.45 1.0 -vd 1 0 -0.1 -vu 0 0 1'}
+             'bottom': '-vp -17.5 -1.55 1.0 -vd 1 0.05 -0.1 -vu 0 0 1'}
 
     program = 'objview' if files.endswith('rad') else program
     vp = views[view] if view in views else view
