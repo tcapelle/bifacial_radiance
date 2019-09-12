@@ -113,3 +113,5 @@ ENV/
 
 # Rope project settings
 .ropeproject
+bifacial_radiance/.vscode/settings.json
+bifacial_radiance/data/module.json
