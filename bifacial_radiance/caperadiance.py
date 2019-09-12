@@ -30,12 +30,11 @@ def get_time_interval(inca, date):
     else: return (sl, sl+1)
 
 
-def read_meteo_file(ines_meteo_file):
-    meteo = pd.read_hdf(ines_meteo_file, key='df')
-    return meteo.meteo[['ghi', 'dni', 'dhi']].rename(columns=str.upper)
+def _convert_meteo(df):
+    return df[['ghi', 'dni', 'dhi']].rename(columns=str.upper)
 
-def define_meteo(inca, ines_meteo_file):
-    inca.input_meteo = read_meteo_file(ines_meteo_file)
+def define_meteo(inca, df):
+    inca.input_meteo  = _convert_meteo(df)
     return inca.readInesMeteoFile(inca.input_meteo, metadata)
 
 def define_scene(inca, monitor=5):
@@ -171,23 +170,18 @@ def add_diag_posts_intra(inca,
                dim=(xsize, length, zsize), t=t + i*array([modulex,0,0]), hpc=hpc)
     return
 
-def add_box(inca):
-    name='Boite_electrique'
-    text='! genbox beigeroof originMarker 0.12 0.20 0.24 | xform -t -12.875 0.35 1.30'
-    customObject = inca.makeCustomObject(name,text)
-    inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
-
-    name='cables'
-    text='! genbox beigeroof originMarker 0.04 0.100 0.07 | xform -t -12.83 0.35 1.24'
-    customObject = inca.makeCustomObject(name,text)
-    inca.appendtoScene(inca.scene.radfiles, customObject, '!xform -rz 0', hpc=True)
-
+def add_box(inca,    
+            scene_name='customScene.rad', 
+            material='beigeroof',
+            hpc=True):
+    genbox(inca,'Boite_electrique', scene_name, material, dim=(0.12, 0.20, 0.24), t=(-12.875, 0.75, 1.30), hpc=hpc)
+    genbox(inca,'cables', scene_name, material, dim=(0.04, 0.1, 0.07), t=(-12.83, 0.75, 1.24), hpc=hpc)
     return
 
 def add_ref_cell(inca):
-    moduletype_refCell = 'celda_ref'
+    moduletype_refCell = 'ref_cell'
     inca.makeModule(name=moduletype_refCell,x=0.12,y=0.12,numpanels = 1)
-    sceneRef_rCell = {'tilt':30,'pitch': 9.5,'clearance_height':1.25,'azimuth':180, 'nMods': 1, 'nRows': 1, 'appendRadfile':True,'originx': -12.815, 'originy': 0.15} 
+    sceneRef_rCell = {'tilt':30,'pitch': 9.5,'clearance_height':1.25,'azimuth':180, 'nMods': 1, 'nRows': 1, 'appendRadfile':True,'originx': -12.815, 'originy': 0.55} 
     sceneObj_rCell = inca.makeScene(moduletype=moduletype_refCell, sceneDict=sceneRef_rCell, hpc=True)
     return sceneObj_rCell
 
@@ -227,7 +221,7 @@ def view(files, view='front', program='rvu'):
     views = {'diag': '-vp -17 3 1 -vd 2 -1 -0.3 -vu 0 0 1 -av 0.2 0.2 0.2',
              'side': '-vp -14.3 0.2 1.5 -vd 1 0 0 -vu 0 0 1 -av 0.2 0.2 0.2',
              'side2': '-vp -17 -6 3.5 -vd 0.2 1 -0.3 -vu 0 0 1 -av 10 10 10 -ab 2',
-             'back': '-vp -12.815 2 1 -vd 0 -1 0 -vu 0 0 1 -av 0.2 0.2 0.2',
+             'back': '-vp -13.215 2 1 -vd 0.3 -1 0 -vu 0 0 1 -av 0.2 0.2 0.2',
              'front': '-vp 0 -40 25 -vd 0 1 -0.5 -vu 0 0 1 -av 0.2 0.2 0.2',
              'top': '-vp -17.5 1.6 2.7 -vd 1 0 -0.1 -vu 0 0 1',
              'bottom': '-vp -17.5 -1.55 1.0 -vd 1 0.05 -0.1 -vu 0 0 1'}
@@ -266,14 +260,15 @@ def run_simulation(date='18 July 2017',
     #define the scene with all the modules and scene dicts
     module6 = define_scene(inca, 5)  #unused if ref_cell present
 
-    #append the ines meteo file
-    define_meteo(inca, ines_meteo_file)
-
     #add strcutures
     if add_struct:
         pivoting_structure(inca)
         add_box(inca)
     inca.monitored_obj = add_ref_cell(inca) if ref_cell else module6 
+
+    #append the ines meteo file
+    meteo_df = pd.read_hdf(ines_meteo_file).meteo[date]
+    define_meteo(inca, meteo_df)
 
     #chose the date of your sim, must be in the input meteo file
     results_file = date.replace(' ', '') + outfile
@@ -295,6 +290,7 @@ def run_simulation(date='18 July 2017',
     print(f'Results file: {results_file}')
     results.to_hdf(project_path/('results/'+results_file+'.hdf'), key='df')
     results.to_csv(project_path/('results/'+results_file+'.csv'))
-
+    return project_path/('results/'+results_file+'.hdf')
+    
 if __name__ == '__main__':
     Fire(run_simulation)
