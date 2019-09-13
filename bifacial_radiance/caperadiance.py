@@ -43,26 +43,27 @@ def define_scene(model, monitor=5):
     mod2 = 'mod2'
     model.makeModule(name=mod2, x=0.99,y=1.65,numpanels = 2,xgap=0.04,ygap=0.05)
     height = 0.77
+    originy = -0.1
     sceneObjs = []
-    sceneDict1 = {'tilt':30,'pitch': 9.5,'clearance_height':1.63,'azimuth':180, 'nMods': 1, 'nRows': 2, 'appendRadfile':True,'originx': -3.09, 'originy': 0.736} 
+    sceneDict1 = {'tilt':30,'pitch': 9.5,'clearance_height':1.63,'azimuth':180, 'nMods': 1, 'nRows': 2, 'appendRadfile':True,'originx': -3.09, 'originy': originy + 0.736} 
     sceneObjs += [model.makeScene(moduletype=mod1,sceneDict=sceneDict1, hpc=True)]
 
-    sceneDict2 = {'tilt':30,'pitch': 9.5,'clearance_height':height,'azimuth':180, 'nMods': 5, 'nRows': 2, 'appendRadfile':True,'originx': 0, 'originy': 0} 
+    sceneDict2 = {'tilt':30,'pitch': 9.5,'clearance_height':height,'azimuth':180, 'nMods': 5, 'nRows': 2, 'appendRadfile':True,'originx': 0, 'originy': originy } 
     sceneObjs += [model.makeScene(moduletype=mod2,sceneDict=sceneDict2, hpc=True)]
 
-    sceneDict3 = {'tilt':30,'pitch': 9.5,'clearance_height':1.63,'azimuth':180, 'nMods': 1, 'nRows': 2, 'appendRadfile':True,'originx': 3.09, 'originy': 0.736} 
+    sceneDict3 = {'tilt':30,'pitch': 9.5,'clearance_height':1.63,'azimuth':180, 'nMods': 1, 'nRows': 2, 'appendRadfile':True,'originx': 3.09, 'originy': originy + 0.736} 
     sceneObjs += [model.makeScene(moduletype=mod1,sceneDict=sceneDict3, hpc=True)]
 
-    sceneDict4 = {'tilt':30,'pitch': 9.5,'clearance_height':height,'azimuth':180, 'nMods': 5, 'nRows': 2, 'appendRadfile':True,'originx': 6.17, 'originy': 0} 
+    sceneDict4 = {'tilt':30,'pitch': 9.5,'clearance_height':height,'azimuth':180, 'nMods': 5, 'nRows': 2, 'appendRadfile':True,'originx': 6.17, 'originy': originy } 
     sceneObjs += [model.makeScene(moduletype=mod2,sceneDict=sceneDict4, hpc=True)]
 
-    sceneDict5 = {'tilt':30,'pitch': 9.5,'clearance_height':height,'azimuth':180, 'nMods': 5, 'nRows': 2, 'appendRadfile':True,'originx': -6.17, 'originy': 0} 
+    sceneDict5 = {'tilt':30,'pitch': 9.5,'clearance_height':height,'azimuth':180, 'nMods': 5, 'nRows': 2, 'appendRadfile':True,'originx': -6.17, 'originy': originy } 
     sceneObjs += [model.makeScene(moduletype=mod2,sceneDict=sceneDict5, hpc=True)]
 
-    sceneDict6 = {'tilt':30,'pitch': 9.5,'clearance_height':height,'azimuth':180, 'nMods': 5, 'nRows': 2, 'appendRadfile':True,'originx': -12.36, 'originy': 0} 
+    sceneDict6 = {'tilt':30,'pitch': 9.5,'clearance_height':height,'azimuth':180, 'nMods': 5, 'nRows': 2, 'appendRadfile':True,'originx': -12.36, 'originy': originy } 
     sceneObjs += [model.makeScene(moduletype=mod2,sceneDict=sceneDict6, hpc=True)]
 
-    sceneDict7 = {'tilt':30,'pitch': 9.5,'clearance_height':height,'azimuth':180, 'nMods': 5, 'nRows': 2, 'appendRadfile':True,'originx': 12.36, 'originy': 0} 
+    sceneDict7 = {'tilt':30,'pitch': 9.5,'clearance_height':height,'azimuth':180, 'nMods': 5, 'nRows': 2, 'appendRadfile':True,'originx': 12.36, 'originy': originy } 
     sceneObjs += [model.makeScene(moduletype=mod2,sceneDict=sceneDict7, hpc=True)]
     
     model.module6 = sceneObjs[monitor]
@@ -98,7 +99,7 @@ def add_vert_posts(model,
     genbox(model,'vert_post6', scene_name, material, dim=(0.12, 0.24, height), t=(5.655, -1.45, 0), hpc=hpc)
     genbox(model,'vert_post7', scene_name, material, dim=(0.12, 0.24, height), t=(8.745, -1.45, 0), hpc=hpc)
     #soil rack
-    genbox(model,'rack_cables', scene_name, material, dim=(24, 0.24, 0.1), t=(-15.965, -1.45+0.24, 0), hpc=hpc)
+    genbox(model,'rack_cables', scene_name, material, dim=(24.7, 0.24, 0.1), t=(-15.965, -1.45+0.24, 0), hpc=hpc)
     return
 
 def pivoting_structure(model, material='Metal_Aluminum_Anodized', angle=30, hpc=True):
@@ -233,7 +234,8 @@ def view(file_list, view='front', program='rvu'):
              'back': '-vp -13.215 2 1 -vd 0.3 -1 0 -vu 0 0 1 -av 0.2 0.2 0.2',
              'front': '-vp 0 -40 25 -vd 0 1 -0.5 -vu 0 0 1 -av 0.2 0.2 0.2',
              'top': '-vp -17.5 1.6 2.7 -vd 1 0 -0.1 -vu 0 0 1',
-             'bottom': '-vp -17.5 -1.55 1.0 -vd 1 0.05 -0.1 -vu 0 0 1'}
+             'bottom': '-vp -17.5 -1.55 1.0 -vd 1 0.05 -0.1 -vu 0 0 1',
+             'front_low': '-vp -17 -5 2 -vd 0.5 1 -0.05 -vu 0 0 1 -av 0.2 0.2 0.2'}
 
     program = 'objview' if file_list[0].endswith('rad') else program
     files = ' '.join([file_list[0]]+[s[s.find('objects'):] for s in file_list if ('objects' in s)])
@@ -274,6 +276,7 @@ def run_simulation(date='18 July 2017',
     if add_struct:
         pivoting_structure(inca)
         add_box(inca)
+        add_really_big_box(inca)
     inca.monitored_obj = add_ref_cell(inca) if ref_cell else module6 
 
     #append the ines meteo file
