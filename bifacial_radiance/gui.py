@@ -99,6 +99,25 @@ class Window(tk.Tk):
             
             '''
             
+            def _set_daily_endtimes():
+                '''
+                for hourly for a day simulations, only start month & day is used
+                enddate and times must be set
+                '''
+                try:
+                    entries = [entry_enddate_day, entry_enddate_month, entry_startdate_hour, entry_enddate_hour]
+                    values = [entry_startdate_day.get(), entry_startdate_month.get(), "1", "23"]
+                    for entry,val in zip(entries, values):
+                        entry.config(state='normal')
+                        entry.delete(0,END)
+                        entry.insert(0,val)
+                        entry.config(state='disabled')
+
+                except:
+                    # no startdate / hour entered
+                    raise Exception('something went wrong')
+                
+            
             testfolder, weatherfile, weatherinputMode, simulation,\
             moduletype, rewriteModule, cellLevelModule, axisofrotationTorqueTube,\
             torqueTube, fixedortracking,  cumulativesky, timestampRangeSimulation,\
@@ -119,6 +138,41 @@ class Window(tk.Tk):
             
             try: inputvariablefile = entry_inputvariablefile.get()
             except: inputvariablefile = os.path.join('data','default.ini')
+            
+            # Initializing
+            daydateSimulation = False
+            timestampRangeSimulation = False   
+            if rb_fixedortracking.get() == 0: 
+                fixedortracking=False # False, fixed. Fixed, Cumulative Sky Yearly
+                cumulativesky = True
+            if rb_fixedortracking.get() == 1: 
+                fixedortracking=False # True, 'tracking' Fixed, Cumulative Sky with Start/End
+                cumulativesky = True
+                daydateSimulation = True #TODO: check this out. new 8/20/19
+                #timestampRangeSimulation = True
+            if rb_fixedortracking.get() == 2: 
+                fixedortracking=False # True, 'tracking'  Fixed, Hourly with Start/End times
+                cumulativesky = False
+                daydateSimulation = True 
+            if rb_fixedortracking.get() == 3: 
+                fixedortracking=False # True, 'tracking'  Fixed, Hourly for the Whole Year
+                cumulativesky = False
+            if rb_fixedortracking.get() == 4: 
+                fixedortracking=True # True, 'tracking'  Tracking, Cumulative Sky Yearly
+                cumulativesky = True
+            if rb_fixedortracking.get() == 5: 
+                fixedortracking=True # True, 'tracking' Tracking, Hourly for a Day
+                cumulativesky = False
+                daydateSimulation = True
+                _set_daily_endtimes()
+            if rb_fixedortracking.get() == 6: 
+                fixedortracking=True # True, 'tracking' Tracking, Hourly with Start/End times
+                cumulativesky = False
+                daydateSimulation = True #TODO: check this out. new 8/20/19
+                #timestampRangeSimulation = True
+            if rb_fixedortracking.get() == 7: 
+                fixedortracking=True # True, 'tracking' Tracking, Hourly for the Whole Year
+                cumulativesky = False
             
             # TODO: Improve validation method.
             try: albedo = entry_albedo.get() #this can either be a number or a material string
@@ -196,6 +250,7 @@ class Window(tk.Tk):
             if len(entry_zgap.get()) != 0:
                 zgap = float(entry_zgap.get())
 
+            
             if len(entry_enddate_day.get()) != 0:
                enddate_day = int(entry_enddate_day.get())
             if len(entry_enddate_hour.get()) != 0:
@@ -218,39 +273,9 @@ class Window(tk.Tk):
     
             if rb_cellLevelModule.get() == 0: cellLevelModule=False
             if rb_cellLevelModule.get() == 1: cellLevelModule=True
-    
+ 
 
-            # Initializing
-            daydateSimulation = False
-            timestampRangeSimulation = False   
-            if rb_fixedortracking.get() == 0: 
-                fixedortracking=False # False, fixed
-                cumulativesky = True
-            if rb_fixedortracking.get() == 1: 
-                fixedortracking=False # True, 'tracking'
-                cumulativesky = True
-                timestampRangeSimulation = True
-            if rb_fixedortracking.get() == 2: 
-                fixedortracking=False # True, 'tracking'
-                cumulativesky = False
-                timestampRangeSimulation = True
-            if rb_fixedortracking.get() == 3: 
-                fixedortracking=False # True, 'tracking'
-                cumulativesky = False
-            if rb_fixedortracking.get() == 4: 
-                fixedortracking=True # True, 'tracking'
-                cumulativesky = True
-            if rb_fixedortracking.get() == 5: 
-                fixedortracking=True # True, 'tracking'
-                cumulativesky = False
-                daydateSimulation = True
-            if rb_fixedortracking.get() == 6: 
-                fixedortracking=True # True, 'tracking'
-                cumulativesky = False
-                timestampRangeSimulation = True
-            if rb_fixedortracking.get() == 7: 
-                fixedortracking=True # True, 'tracking'
-                cumulativesky = False
+            
                 
             if rb_GCRorPitch.get() == 0: GCRorPitch='gcr'
             if rb_GCRorPitch.get() == 1: GCRorPitch='pitch'
@@ -269,8 +294,8 @@ class Window(tk.Tk):
             if rb_tubeType.get() == 2: tubeType='hex'
             if rb_tubeType.get() == 3: tubeType='oct'
           
-            if rb_weatherinputModule.get() == 0: weatherinputMode='True'   # True reads EPW or TMY
-            if rb_weatherinputModule.get() == 1: weatherinputMode='False'  # False reads epw
+            if rb_weatherinputModule.get() == 0: weatherinputMode='True'   # True gets epw
+            if rb_weatherinputModule.get() == 1: weatherinputMode='False'  # False reads epw or TMY
 
             #TODO: add validation for inputs depending on options selected
             
@@ -317,10 +342,12 @@ class Window(tk.Tk):
             if xgap is not None: moduleParamsDict['xgap'] =  xgap
             if ygap is not None: moduleParamsDict['ygap'] =  ygap 
             if zgap is not None: moduleParamsDict['zgap'] =  zgap
-        
             if GCRorPitch is not None: sceneParamsDict['gcrorpitch'] =  GCRorPitch
-            if gcr is not None: sceneParamsDict['gcr'] =  gcr 
-            if pitch is not None: sceneParamsDict['pitch'] =  pitch 
+            #print('gcr or pitch: {}'.format(GCRorPitch))
+            if GCRorPitch == 'gcr' and gcr is not None:
+                sceneParamsDict['gcr'] =  gcr
+            elif pitch is not None:
+                sceneParamsDict['pitch'] =  pitch
             if albedo is not None: sceneParamsDict['albedo'] =  albedo
             if nMods is not None: sceneParamsDict['nMods'] = nMods 
             if nRows is not None: sceneParamsDict['nRows'] =  nRows
@@ -434,14 +461,14 @@ class Window(tk.Tk):
             entry_inputvariablefile.insert(0, "BB") #FIX
             entry_limitangle.insert(0,"60")
             entry_moduletype.insert(0,"Prism Solar Bi60")
-            entry_modWanted.insert(0,"10")
+            entry_modWanted.insert(0,"") #was 10
             entry_nMods.insert(0,"20")
             entry_nRows.insert(0,"7")
             entry_numberofPanels.insert(0,"2")
             entry_numcellsx.insert(0,"12")
             entry_numcellsy.insert(0,"6")
             entry_pitch.insert(0,"10")
-            entry_rowWanted.insert(0,"3")
+            entry_rowWanted.insert(0,"") #was 3
             entry_sensorsy.insert(0,"9")
             entry_simulation.insert(0,"Demo1")
             entry_startdate_day.insert(0,"21")
@@ -959,7 +986,7 @@ class Window(tk.Tk):
         
         # MAIN CONTROL
         ###################
-        # Create teh widgets for the maincontrol_frame
+        # Create the widgets for the maincontrol_frame
         def selGetEPW():
             getepwfile_label.config(state='normal')
             entry_getepwfileLat.config(state='normal')
@@ -1163,9 +1190,10 @@ class Window(tk.Tk):
         # Fixed, Hourly by Tiestamps:
         def tcThree():
             selfixed()
-            tcTimestamps()
+            tcStartEndDate()
+            #tcTimestamps()
         
-        # Fixed, Hourly for hte whole Year:
+        # Fixed, Hourly for the whole Year:
         def tcFour():
             selfixed()
             tcAll()
@@ -1194,7 +1222,7 @@ class Window(tk.Tk):
         rb_fixedortracking=IntVar()
         rad1_fixedortracking = Radiobutton(simulationcontrol_frame, variable=rb_fixedortracking, indicatoron = 0, width = 50, text='Fixed, Cumulative Sky Yearly', value=0, command=tcOne)
         rad2_fixedortracking = Radiobutton(simulationcontrol_frame, variable=rb_fixedortracking, indicatoron = 0, width = 50,  text='Fixed, Cumulative Sky with Start/End times', value=1, command=tcTwo)
-        rad3_fixedortracking = Radiobutton(simulationcontrol_frame, variable=rb_fixedortracking, indicatoron = 0, width = 50,  text='Fixed, Hourly by Timestamps', value=2, command=tcThree)
+        rad3_fixedortracking = Radiobutton(simulationcontrol_frame, variable=rb_fixedortracking, indicatoron = 0, width = 50,  text='Fixed, Hourly with Start/End times', value=2, command=tcThree) #text='Fixed, Hourly by Timestamps'
         rad4_fixedortracking = Radiobutton(simulationcontrol_frame, variable=rb_fixedortracking, indicatoron = 0, width = 50,  text='Fixed, Hourly for the Whole Year', value=3, command=tcFour)
         rad5_fixedortracking = Radiobutton(simulationcontrol_frame, variable=rb_fixedortracking, indicatoron = 0, width = 50,  text='Tracking, Cumulative Sky Yearly', value=4, command=tcFive)
         rad6_fixedortracking = Radiobutton(simulationcontrol_frame, variable=rb_fixedortracking, indicatoron = 0, width = 50,  text='Tracking, Hourly for a Day', value=5, command=tcSix)
