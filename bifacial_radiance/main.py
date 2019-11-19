@@ -69,7 +69,7 @@ from time import sleep
 #from pathlib import Path
 
 #from bifacial_radiance.config import *
-from bifacial_radiance.readepw import readepw # epw file reader from pvlib development forums  #module load format
+# from bifacial_radiance.readepw import readepw # epw file reader from pvlib development forums  #module load format
 from bifacial_radiance.load import loadTrackerDict
 import bifacial_radiance.modelchain
 '''
@@ -579,7 +579,7 @@ class RadianceObj:
 
         return self.metdata       
      
-    def readTMY(self, tmyfile=None):
+    def _saveTempTMY(self, tmydata, filename=None, starttime=None, endtime=None):
         '''
         private function to save part or all of tmydata into /EPWs/ for use 
         in gencumsky -G mode and return truncated  tmydata
@@ -3376,7 +3376,7 @@ class AnalysisObj:
             df.to_csv(os.path.join("results", savefile), sep = ',',
                       columns = ['x','y','z', 'mattype','Wm2'], index = False)
 
-        print('Saved: %s'%(os.path.join("results", savefile)))
+        # print('Saved: %s'%(os.path.join("results", savefile)))
         return os.path.join("results", savefile)
 
     def _saveResultsCumulative(self, data, reardata=None, savefile=None):
