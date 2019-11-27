@@ -238,7 +238,10 @@ def view(file_list, view='front', program='rvu'):
              'front_low': '-vp -17 -5 2 -vd 0.5 1 -0.05 -vu 0 0 1 -av 0.2 0.2 0.2'}
 
     program = 'objview' if file_list[0].endswith('rad') else program
-    files = ' '.join([file_list[0]]+[s[s.find('objects'):] for s in file_list if ('objects' in s)])
+    if isinstance(file_list,list):
+        files = ' '.join([file_list[0]]+[s[s.find('objects'):] for s in file_list if ('objects' in s)])
+    if isinstance(file_list, str):
+        files = file_list
     vp = views[view] if view in views else view
     cmd = _cmd(program, vp, files)
     return _popen(cmd, None)
