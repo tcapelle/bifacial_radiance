@@ -203,7 +203,7 @@ def compute_radiance(timeindex, model, sim_name='sim', sensorsy=9):
         filelist = model.getfilelist()
         filelist[1] = skyname
         def _format_dt(dt):
-            return f'{dt.day}-{dt.month}-{dt.year}_{dt.time()}'
+            return f'{dt.day}-{dt.month}-{dt.year}_{dt.time().hour}{dt.time().minute}'
         octfile = model.makeOct(filelist, octname = sim_name + _format_dt(model.metdata.datetime[timeindex]) )
         analysis = AnalysisObj(octfile, model.basename) 
         _, backscan = analysis.moduleAnalysis(model.monitored_obj, sensorsy=sensorsy)
