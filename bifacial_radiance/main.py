@@ -3198,7 +3198,7 @@ class AnalysisObj:
                                 a['Nx'],a['Ny'],a['Nz'],a['orient'])
         return linepts
 
-    def _linePtsMake3D(self, xstart, ystart, zstart, xinc, yinc, zinc,
+     def _linePtsMake3D(self, xstart, ystart, zstart, xinc, yinc, zinc,
                       Nx, Ny, Nz, orient):
         #linePtsMake(xpos,ypos,zstart,zend,Nx,Ny,Nz,dir)
         #create linepts text input with variable x,y,z.
@@ -3211,14 +3211,12 @@ class AnalysisObj:
         Ny = int(Ny)
         Nz = int(Nz)
 
-
-        for iz in range(0,Nz):
-            for iy in range(0,Ny):
-                ypos = ystart+iy*yinc
-                xpos = xstart+iy*xinc
-                zpos = zstart+iy*zinc
-                linepts = linepts + str(xpos) + ' ' + str(ypos) + \
-                          ' '+str(zpos) + ' ' + orient + " \r"
+        for i in range(0,Nx*Ny*Nz):
+            ypos = ystart+i*yinc
+            xpos = xstart+i*xinc
+            zpos = zstart+i*zinc
+            linepts = linepts + str(xpos) + ' ' + str(ypos) + \
+				' '+str(zpos) + ' ' + orient + " \r"
         return(linepts)
 
     def _irrPlot(self, octfile, linepts, mytitle=None, plotflag=None,
