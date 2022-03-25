@@ -77,7 +77,32 @@ void plastic Metal_Grey
 0
 5  0.43 0.448 0.465  0.5 0.5
 
-void glass glass
+void glass Module_glass
 0
 0
-3 .96 .96 .96
+3 0.96 0.96 0.96
+
+# Acceptable values:
+# transmission [Ø:1],[Ø:1],[Ø:1] 
+# Min Ø, Max 1
+# black - transparent
+
+void dielectric testmat
+0
+0
+5 0.5 0.85 0.5 1.4 0
+
+void metal PVcell
+0
+0
+5 0.036 0.0383 0.0532 0.0299 0.2
+
+# Acceptable values:
+# colour [Ø:1],[Ø:1],[Ø:1] Min Ø, Max 1
+#        Ø-1ØØ% reflectance
+# specularity [Ø:1] Sug Min
+#              Ø.5, Max 1
+#             dirty - clean
+# roughness [Ø:1] Min Ø,
+#             Sug Max Ø.5
+# 			polished - roughened

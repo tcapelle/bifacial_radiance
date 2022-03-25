@@ -707,6 +707,7 @@ class RadianceObj:
         tmydata.index = tmydata.index+pd.Timedelta(hours=1) 
         # rename different field parameters to match output from 
         # pvlib.tmy.readtmy: DNI, DHI, DryBulb, Wspd
+       
         tmydata.rename(columns={'dni':'DNI',
                                 'dhi':'DHI',
                                 'temp_air':'DryBulb',
@@ -1332,6 +1333,7 @@ class RadianceObj:
             return None
 
         cmd = 'oconv ' + ' '.join(filelist)
+        #import pdb; pdb.set_trace()
         with open('%s.oct' % (octname), "w") as f:
             _,err = _popen(cmd, None, f)
             #TODO:  exception handling for no sun up
@@ -1385,6 +1387,14 @@ class RadianceObj:
         for index in sorted(indexlist):  # run through either entire key list of trackerdict, or just a single value
             try:
                 filelist = self.materialfiles + [trackerdict[index]['skyfile'], trackerdict[index]['radfile']]
+                if self.refcell is True:
+                    filelist += [trackerdict[index]['ref_cell']]
+                if self.racking is True:
+                    filelist += trackerdict[index]['objs']                              
+                #if self.refcell is True:
+                #    filelist = self.materialfiles + [trackerdict[index]['skyfile'], trackerdict[index]['radfile'],trackerdict[index]['ref_cell']]+trackerdict[index]['objs']
+                #else: 
+                #    filelist = self.materialfiles + [trackerdict[index]['skyfile'], trackerdict[index]['radfile'],]+trackerdict[index]['objs']
                 octname = '1axis_%s%s'%(index, customname)
                 trackerdict[index]['octfile'] = self.makeOct(filelist, octname, hpc)
             except KeyError as e:
@@ -1503,14 +1513,14 @@ class RadianceObj:
 
         if modulefile is None:
             modulefile = os.path.join('objects', name2 + '.rad')
-            print("\nModule Name:", name2)
+            #print("\nModule Name:", name2)
 
         if rewriteModulefile is True:
             if os.path.isfile(modulefile):
                 print('REWRITING pre-existing module file. ')
                 os.remove(modulefile)
-            else:
-                print('Module file did not exist before, creating new module file')
+            #else:
+                #print('Module file did not exist before, creating new module file')
 
         if orientation is not None:
             print('\n\n WARNING: Orientation format has been deprecated since '+
@@ -1676,6 +1686,85 @@ class RadianceObj:
         self.moduleDict = moduleDict
 
         return moduleDict
+    
+    def addModuleGlass(self, name=None,rewriteModulefile=True):
+        """
+        Add module details to the .JSON module config file module.json
+        makeModule is in the `RadianceObj` class because this is defined before a `SceneObj` is.
+        Module definitions assume that the module .rad file is defined
+        with zero tilt, centered along the x-axis and y-axis for the center
+        of rotation of the module (+X/2, -X/2, +Y/2, -Y/2 on each side).
+        Tip: to define a module that is in 'portrait' mode, y > x. 
+        Parameters
+        ------------
+        name : str
+            Input to name the module type
+        x : numeric
+            Width of module along the axis of the torque tube or racking structure. (meters).
+        ."""
+
+        import json
+        filedir = os.path.join(DATA_PATH,'module.json')
+        with open( filedir ) as configfile:
+            data = json.load(configfile)
+        modulenames = data.keys()
+        moduleDict = {}
+        if name is None:
+            return modulenames
+        if name in modulenames:
+            moduleDict = data[name]
+            moduletype = name
+            #import pdb; pdb.set_trace()
+            name2 = moduleDict['text'].split(' ')[3]+'_glass' 
+            moduleDict['modulefile'] = os.path.join('objects', name2 + '.rad')
+            modulefile = moduleDict['modulefile']
+            if rewriteModulefile is True:
+                if os.path.isfile(modulefile):
+                    print('REWRITING pre-existing module file. ')
+                    os.remove(modulefile)
+                #else:
+                    #print('Module file did not exist before, creating new module file')
+            text = moduleDict['text'].split(' ')
+            text[12] = text[6] # Change the initial position of the glass to be over the cells
+            text[2] = 'testmat'#'Module_glass' #'testmat' #
+            text[3] = name2
+            #moduleDict['text'] = moduleDict['text'].replace('black','Module_glass')
+            #moduleDict['text'] = moduleDict['text'].replace(moduletype,name2)
+            moduleDict['text'] = ' '.join(text)
+            #import pdb; pdb.set_trace()
+            if moduleDict['cellModule']:
+                text = moduleDict['text'].split(' ')
+                text[4] = str(moduleDict['x'])
+                text[5] = str(moduleDict['y'])
+                moduleDict['cellModule'] = None
+                moduleDict['text'] = ' '.join(text[0:13])
+
+        #    #
+        #            #create new .RAD file
+        #    if not os.path.isfile(radfile):
+        #        # py2 and 3 compatible: binary write, encode text first
+        #        with open(radfile, 'wb') as f:
+        #            f.write(moduleDict['text'].encode('ascii'))
+        #    #if not os.path.isfile(radfile):
+        #    #    raise Exception('Error: module file not found {}'.format(radfile))mod
+        #    modulefile = radfile
+        #    return moduleDict
+        #else:
+        #    print('Error: module name {} doesnt exist'.format(name))
+        #    return {}
+#
+        
+            filedir = os.path.join(DATA_PATH, 'module.json') 
+            with open(filedir) as configfile:
+                data = json.load(configfile)
+            data.update({name2:moduleDict})
+            with open(os.path.join(DATA_PATH, 'module.json') ,'w') as configfile:
+                json.dump(data, configfile)
+            print('Module {} successfully created'.format(name2))
+            self.moduleDict = moduleDict
+            return moduleDict
+        else: 
+            print('Module not found in modulenames',modulenames)
 
 
     def makeCustomObject(self, name=None, text=None):
@@ -1707,7 +1796,7 @@ class RadianceObj:
         with open(customradfile, 'wb') as f:
             f.write(text.encode('ascii'))
 
-        print("\nCustom Object Name", customradfile)
+        #print("\nCustom Object Name", customradfile)
         self.customradfile = customradfile
         return customradfile
 
@@ -1880,11 +1969,11 @@ class RadianceObj:
         #verify .rad file exists, else create
 
         if radfile.exists():
-            print(f'{radfile.name} exists!,\n>> Appending {customObject.name}' )
+            #print(f'{radfile.name} exists!,\n>> Appending {customObject.name}' )
             with open(radfile, 'a+') as f:
                 f.write(cmd)
         else:
-            print(f'{radfile} created!' )
+            #print(f'{radfile} created!' )
             with open(radfile, 'w') as f:
                 f.write(cmd)
             self.radfiles.append(str(radfile))
@@ -2778,6 +2867,7 @@ class MetObj:
         self.ghi = tmydata.GHI.tolist()
         self.dhi = tmydata.DHI.tolist()
         self.dni = tmydata.DNI.tolist()
+        #self.temp_air = tmydata.DryBulb.tolist() # uncomment when using temperature from tmy files
 
         #v0.2.5: always initialize the MetObj with solpos, sunrise/sunset and corrected time
         datetimetz = pd.DatetimeIndex(self.datetime)
@@ -2897,7 +2987,7 @@ class MetObj:
         else:
             # trackerdict uses timestamp as keys. return azimuth
             # and tilt for each timestamp
-            times = [str(i)[5:-12].replace('-','_').replace(' ','_') for i in self.datetime]
+            times = [str(i)[5:-9].replace('-','_').replace(' ','_') for i in self.datetime]
             #trackerdict = dict.fromkeys(times)
             trackerdict = {}
             for i,time in enumerate(times) :
@@ -3191,11 +3281,16 @@ class AnalysisObj:
 
         return x, y, z
         
-    def _linePtsMakeDict(self, linePtsDict):
+    def _linePtsMakeDict(self, linePtsDict,cellLevel=False):
         a = linePtsDict
-        linepts = self._linePtsMake3D(a['xstart'],a['ystart'],a['zstart'],
-                                a['xinc'], a['yinc'], a['zinc'],
-                                a['Nx'],a['Ny'],a['Nz'],a['orient'])
+        if cellLevel is False:
+            linepts = self._linePtsMake3D(a['xstart'],a['ystart'],a['zstart'],
+                                    a['xinc'], a['yinc'], a['zinc'],
+                                    a['Nx'],a['Ny'],a['Nz'],a['orient'])
+        else:
+            linepts = self._linePtsCellLevelMake3D(a['xstart'],a['ystart'],a['zstart'],
+                                    a['xinc'], a['yinc'], a['zinc'],
+                                    a['Nx'],a['Ny'],a['Nz'],a['orient'],a['nxstart'],a['nxinc'],a['azimuth'])
         return linepts
 
     def _linePtsMake3D(self, xstart, ystart, zstart, xinc, yinc, zinc,
@@ -3219,6 +3314,45 @@ class AnalysisObj:
                 zpos = zstart+iy*zinc
                 linepts = linepts + str(xpos) + ' ' + str(ypos) + \
                           ' '+str(zpos) + ' ' + orient + " \r"
+        return(linepts)
+    
+    def _linePtsCellLevelMake3D(self, xstart, ystart, zstart, xinc, yinc, zinc,
+                      Nx, Ny, Nz, orient,nxstart,nxinc,azimuth):
+        #linePtsMake(xpos,ypos,zstart,zend,Nx,Ny,Nz,dir)
+        #create linepts text input with variable x,y,z.
+        #If you don't want to iterate over a variable, inc = 0, N = 1.
+
+        #now create our own matrix - 3D nested X,Y,Z
+        linepts = ""
+        # make sure Nx, Ny, Nz are ints.
+        Nx = int(Nx)
+        Ny = int(Ny)
+        Nz = int(Nz)
+        if (azimuth ==90)|(azimuth ==-90):
+            '''for vertical tilted paysage''' 
+            linepts = ""
+            for iz in range(0,int(Nz)):
+                for ix in range(0,Nx):       
+                    for iy in range(0,int(Ny)):
+                        ypos = ystart+ix*yinc
+                        xpos = nxstart#+ix*nxinc
+                        zpos = zstart+iy*zinc
+                        linepts = linepts + str(xpos) + ' ' + str(ypos) + \
+                                  ' '+str(zpos) + ' ' + orient + " \r"
+        else:
+            #print('nxstart:', nxstart)
+            '''for tilted facing north or south''' 
+            linepts = ""
+            for iz in range(0,int(Nz)):
+                for ix in range(0,Nx):       
+                    for iy in range(0,int(Ny)):
+                        ypos = ystart+iy*yinc
+                        xpos = nxstart+ix*nxinc
+                        zpos = zstart+iy*zinc
+                        linepts = linepts + str(xpos) + ' ' + str(ypos) + \
+                                  ' '+str(zpos) + ' ' + orient + " \r"
+            
+        
         return(linepts)
 
     def _irrPlot(self, octfile, linepts, mytitle=None, plotflag=None,
@@ -3280,11 +3414,11 @@ class AnalysisObj:
 
         keys = ['Wm2','x','y','z','r','g','b','mattype']
         out = {key: [] for key in keys}
-        #out = dict.fromkeys(['Wm2','x','y','z','r','g','b','mattype','title'])
+        # out = dict.fromkeys(['Wm2','x','y','z','r','g','b','mattype','title'])
         out['title'] = mytitle
         # print ('Linescan in process: %s' %(mytitle))
-        #rtrace ambient values set for 'very accurate':
-        #cmd = "rtrace -i -ab 5 -aa .08 -ar 512 -ad 2048 -as 512 -h -oovs "+ octfile
+        # rtrace ambient values set for 'very accurate':
+        # cmd = "rtrace -i -ab 5 -aa .08 -ar 512 -ad 2048 -as 512 -h -oovs "+ octfile
 
         if accuracy == 'low':
             #rtrace optimized for faster scans: (ab2, others 96 is too coarse)
@@ -3428,7 +3562,7 @@ class AnalysisObj:
         return (savefile)
 
     def moduleAnalysis(self, scene, modWanted=None, rowWanted=None,
-                       sensorsy=9.0, debug=False):
+                       sensorsy=9.0,cellLevel=False, debug=False):
         """
         This function defines the scan points to be used in the :py:class:`~bifacial_radiance.AnalysisObj.analysis` function,
         to perform the raytrace through Radiance function `rtrace`
@@ -3479,6 +3613,18 @@ class AnalysisObj:
         nRows = sceneDict['nRows']
         originx = sceneDict['originx']
         originy = sceneDict['originy']
+        
+        if cellLevel is True:
+            try:
+                moduleDict =scene.moduleDict['cellModule']
+                ycell=moduleDict['ycell']
+                ycellgap = moduleDict['ycellgap']
+                cellsIny = moduleDict['numcellsy'] *scene.moduleDict['numpanels']  
+                xcell=moduleDict['xcell']
+                xcellgap = moduleDict['xcellgap']
+                cellsInx = moduleDict['numcellsx']
+            except:
+                print("CellModule in scene.moduleDict maybe None, you need to define a cellLevel module with makeModule class")
 
        # offset = moduleDict['offsetfromaxis']
         offset = scene.offsetfromaxis
@@ -3609,18 +3755,51 @@ class AnalysisObj:
         front_orient = '%0.3f %0.3f %0.3f' % (-xdir, -ydir, -zdir)
         back_orient = '%0.3f %0.3f %0.3f' % (xdir, ydir, zdir)
         
-        frontscan = {'xstart': xstart+xinc, 'ystart': ystart+yinc,
-                     'zstart': zstart + zinc + 0.06,
-                     'xinc':xinc, 'yinc': yinc,
-                     'zinc':zinc , 'Nx': 1, 'Ny':sensorsy, 'Nz':1, 'orient':front_orient }
-        backscan = {'xstart':xstart+xinc, 'ystart':  ystart+yinc,
-                     'zstart': zstart + zinc - 0.03,
-                     'xinc':xinc, 'yinc': yinc,
-                     'zinc':zinc, 'Nx': 1, 'Ny':sensorsy, 'Nz':1, 'orient':back_orient }
+        if cellLevel is False:
+
+            frontscan = {'xstart': xstart+xinc, 'ystart': ystart+yinc,
+                         'zstart': zstart + zinc + 0.06,
+                         'xinc':xinc, 'yinc': yinc,
+                         'zinc':zinc , 'Nx': 1, 'Ny':sensorsy, 'Nz':1, 'orient':front_orient }
+            backscan = {'xstart':xstart+xinc, 'ystart':  ystart+yinc,
+                         'zstart': zstart + zinc - 0.03,
+                         'xinc':xinc, 'yinc': yinc,
+                         'zinc':zinc, 'Nx': 1, 'Ny':sensorsy, 'Nz':1, 'orient':back_orient }
+        else:
+            
+            # Parameters to place sensors in the middle of cells module
+            cell_y =  ycell +ycellgap
+            xinc = -(cell_y) * np.cos((tilt)*dtor) * np.sin((azimuth)*dtor)
+            yinc = -(cell_y) * np.cos((tilt)*dtor) * np.cos((azimuth)*dtor)
+            zinc = (cell_y) * np.sin(tilt*dtor)
+            
+            # Parameters for scan along x axis
+            cell_x =  xcell +xcellgap
+            # We choose the starting point for sampling along the array depending on the numbers on cells along x axis
+            if (cellsInx%2)==0: # Pair number of cells 
+                nxstart = ((cellsInx*cell_x)/2+xstart)-cell_x#xstart+(((cellsInx/2))*cell_x)# For portrait and AZ = 180 ---> xstart-2*cell_x#
+            else:
+                nxstart = ((cellsInx*cell_x)/2+xstart)
+                
+            nxinc = cell_x * np.cos((azimuth-180)*dtor)
+            if debug is True:
+                print('xcell:',xcell,'ycellgap:',ycellgap)
+                print('cellsInx:',cellsInx)
+                print('xstart:',xstart)
+                print('nxinc:',nxinc)
+
+            frontscan = {'xstart': xstart+(xinc/2), 'ystart': ystart+(yinc/2),
+                         'zstart': zstart + (zinc/2) + 0.06,
+                         'xinc':xinc, 'yinc': yinc,
+                         'zinc':zinc , 'Nx': cellsInx, 'Ny':cellsIny, 'Nz':1, 'orient':front_orient,'nxstart':nxstart,'nxinc':nxinc,'azimuth':azimuth }
+            backscan = {'xstart':xstart+(xinc/2), 'ystart':  ystart+(yinc/2),
+                         'zstart': zstart + (zinc/2) - 0.03,
+                         'xinc':xinc, 'yinc': yinc,
+                         'zinc':zinc, 'Nx': cellsInx, 'Ny':cellsIny, 'Nz':1, 'orient':back_orient,'nxstart':nxstart,'nxinc':nxinc,'azimuth':azimuth }
 
         return frontscan, backscan
 
-    def analysis(self, octfile, name, frontscan, backscan, plotflag=False, accuracy='low'):
+    def analysis(self, octfile, name, frontscan, backscan,frontscanCellLevel=False,rearscanCellLevel=False, plotflag=False, accuracy='low'):
         """
         General analysis function, where linepts are passed in for calling the
         raytrace routine :py:class:`~bifacial_radiance.AnalysisObj._irrPlot` 
@@ -3655,12 +3834,13 @@ class AnalysisObj:
         if octfile is None:
             print('Analysis aborted - no octfile \n')
             return None, None
-        linepts = self._linePtsMakeDict(frontscan)
+        
+        linepts = self._linePtsMakeDict(frontscan,cellLevel=frontscanCellLevel)
         frontDict = self._irrPlot(octfile, linepts, name+'_Front',
                                     plotflag=plotflag, accuracy=accuracy)
 
         #bottom view.
-        linepts = self._linePtsMakeDict(backscan)
+        linepts = self._linePtsMakeDict(backscan,cellLevel=rearscanCellLevel)    
         backDict = self._irrPlot(octfile, linepts, name+'_Back',
                                    plotflag=plotflag, accuracy=accuracy)
         # don't save if _irrPlot returns an empty file.
